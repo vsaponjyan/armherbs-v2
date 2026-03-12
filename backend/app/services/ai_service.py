@@ -46,7 +46,7 @@ class AIService:
         except OpenAIError as e:
             raise HTTPException(status_code=502, detail=str(e))
             
-#_________________________________________________________________________
+
     async def get_rag_answer(self, system_prompt: str, user_prompt: str):
         """Ստանում է պատասխանը GPT մոդելից։"""
         response = self.client.chat.completions.create(
