@@ -1,20 +1,47 @@
+#beckend/build_symptom_index.py
 import json
+import sys
 from pathlib import Path
+from itertools import combinations
 from collections import defaultdict, Counter
 
-# ===============================
-# Paths
-# ===============================
-backend_dir     = Path(__file__).parent.resolve()
-herbs_data_path = backend_dir / "herbs_raw_data.json"
-output_path     = backend_dir / "symptom_index.json"
 
+# 1. Finding the main backend folder
+# scripts/build_symptom_index.py -> .parent (scripts) -> .parent (backend)
+BACKEND_DIR = Path(__file__).parent.parent.resolve()
+
+# 2. We define the DATA folder
+DATA_DIR = BACKEND_DIR / "data"
+
+# 3. We define file addresses
+herbs_data_path = DATA_DIR / "herbs_raw_data.json"
+output_path     = DATA_DIR / "symptom_index.json"
+
+print(f"Reading from: {herbs_data_path}")
+print(f"Writing to: {output_path}")
+
+
+# if not herbs_data_path.exists():
+#     print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
+#     sys.exit(1)
+
+# with open(herbs_data_path, "r", encoding="utf-8") as f:
+#     herbs = json.load(f)
+
+#print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
 if not herbs_data_path.exists():
     print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
-    exit(1)
+    sys.exit(1)
 
-with open(herbs_data_path, "r", encoding="utf-8") as f:
-    herbs = json.load(f)
+try:
+    with open(herbs_data_path, "r", encoding="utf-8") as f:
+        herbs = json.load(f)
+except json.JSONDecodeError:
+    print(f"❌ ՍԽԱԼ: {herbs_data_path} ֆայլը վնասված է (JSON format error):")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ Անսպասելի սխալ ֆայլը կարդալիս: {e}")
+    sys.exit(1)
 
 print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
 
@@ -29,7 +56,7 @@ ARMENIAN_STOPWORDS = {
 }
 
 def extract_words(text: str) -> list[str]:
-    """Տեքստից հանել 4+ տառ բառեր, stopwords-ը հանած։"""
+    """Extract 4+ letter words from text, excluding stopwords:"""
     return [
         w.strip(",.։;՝()[]«»")
         for w in text.split()
@@ -42,16 +69,22 @@ def extract_words(text: str) -> list[str]:
 # ===============================
 symptom_cooccurrence: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
+# for herb in herbs:
+#     symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
+#     for symptom in symptoms:
+#         for related in symptoms:
+#             if related != symptom:
+#                 symptom_cooccurrence[symptom][related] += 1
 for herb in herbs:
     symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
-    for symptom in symptoms:
-        for related in symptoms:
-            if related != symptom:
-                symptom_cooccurrence[symptom][related] += 1
+    for a, b in combinations(symptoms, 2):
+        symptom_cooccurrence[a][b] += 1
+        symptom_cooccurrence[b][a] += 1
+
 
 symptom_healing_keywords: dict[str, list[str]] = defaultdict(list)
 
-CONTEXT_WINDOW = 150  # ±150 նիշ symptom-ի շուրջ
+CONTEXT_WINDOW = 150  # ±150 character around symptom
 
 for herb in herbs:
     symptoms  = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
@@ -64,18 +97,18 @@ for herb in herbs:
         if pos == -1:
             continue
 
-        # ±150 նիշ context symptom-ի շուրջ
+        # ±150 character around context symptom
         context_start = max(0, pos - CONTEXT_WINDOW)
         context_end   = min(len(full_text), pos + len(symptom) + CONTEXT_WINDOW)
         context       = full_text[context_start:context_end]
 
-        # Context-ի բառերը — symptom-ն ինքը հանած
+        #Context words — minus the symptom itself
         context_words = [
             w for w in extract_words(context)
             if w != symptom
         ]
 
-        # Counter — ամենահաճախ = ամենառելևանտ
+        # Counter — most frequent = most relevant
         counted  = Counter(context_words)
         relevant = [w for w, _ in counted.most_common(6)]
 
@@ -147,4 +180,4 @@ for s in sample_symptoms:
     print(f"  '{s}' → co-occur: {co[:3]} | keywords: {keys[:3]}")
 
 # ✅ Ready to run:
-# ./venv/bin/python build_symptom_index.py
+# ./venv/bin/python scripts/build_symptom_index.py

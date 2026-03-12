@@ -25,7 +25,7 @@
       "հարբվածություն"
     ],
   
-    "htmlFile": "rubus-idaeus.html",
+    
     "img": "https://armherbs.com/img/%D5%A1%D5%A6%D5%B6%D5%BE%D5%A1%D5%B4%D5%B8%D6%80%D5%AB.gif"
   }
   ,
@@ -63,7 +63,7 @@
       "աթերոսկլերոզ"
     ],
   
-    "htmlFile": "crataegus.html",
+    
     "img": "https://armherbs.com/img/%D5%A1%D5%AC%D5%B8%D5%B3%D5%A5%D5%B6%D5%AB.png"
   },
 
@@ -101,7 +101,7 @@
       "նյարդային անհանգստություն",
       "քնի խանգարում"
     ],
-    "htmlFile": "mentha.html",
+    
     "img": "https://armherbs.com/img/%D5%A1%D5%B6%D5%A1%D5%B6%D5%B8%D6%82%D5%AD.jpeg"
   },
 
@@ -136,7 +136,7 @@
       "արյունահոսություն",
       "որդեր"
     ],
-    "htmlFile": "helichrysium.html",
+    
     "img":"https://armherbs.com/img/%D5%A1%D5%B6%D5%A9%D5%A1%D5%BC%D5%A1%D5%B4.jpeg"
   },
   
@@ -172,7 +172,7 @@
       "մաշկային հիվանդություններ",
       "իմպոտենցիա"
     ],
-    "htmlFile": "leonurus.html",
+    
     "img": "https://armherbs.com/img/%D5%A1%D5%BC%D5%B5%D5%B8%D6%82%D5%AE%D5%A1%D5%A3%D5%AB.png"
   },
   {
@@ -207,7 +207,7 @@
       "արյան բարձր ճնշում",
       "կլիմաքսային խանգարումներ"
     ],
-    "htmlFile": "sanguisorba.html",
+    
     "img": "https://armherbs.com/img/%D5%A1%D6%80%D5%B5%D5%B8%D6%82%D5%B6%D5%AD%D5%B4%D5%AB%D5%AF.png"
   },
   {
@@ -245,7 +245,7 @@
       "նյարդային խանգարումներ",
       "ռևմատիզմ"
     ],
-    "htmlFile": "astragalus.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%A1%D5%A6.png"
   },
   {
@@ -291,7 +291,7 @@
       "մալարիա",
       "տենդային վիճակներ"
     ],
-    "htmlFile": "cuscuta.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%A1%D5%B2%D5%B1.png"
   },
   {
@@ -332,7 +332,7 @@
       "գլխապտույտ",
       "տեսողության խանգարում"
     ],
-    "htmlFile": "daphne.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%A1%D5%B5%D5%AC%D5%A1%D5%B0%D5%A1%D5%BF.png"
   },
   {
@@ -365,7 +365,7 @@
       "խրոնիկական թուլություն",
       "վեգետանևրոզներ"
     ],
-    "htmlFile": "humulus.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%A1%D5%B5%D5%AC%D5%B8%D6%82%D5%AF.jpg"
   },
   {
@@ -393,7 +393,7 @@
       "վերքային ցավ",
       "թարմ պտղի անբավարարություն"
     ],
-    "htmlFile": "getnamori.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%A5%D5%BF%D5%B6%D5%A1%D5%B4%D5%B8%D6%80%D5%AB.jpg"
   },
   {
@@ -423,7 +423,7 @@
       "բրոնխիալ ասթմա",
       "ստամոքսի սուր և խրոնիկական բորբոքումներ"
     ],
-    "htmlFile": "juniperus.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%AB%D5%B0%D5%AB.png"
   },
   {
@@ -452,7 +452,7 @@
       "ռևմատիկ ցավեր",
       "խրոնիկական փորկապություն"
     ],
-    "htmlFile": "primula.html",
+    
     "img": "https://armherbs.com/img/%D5%A3%D5%B6%D5%A1%D6%80%D5%A2%D5%B8%D6%82%D5%AF.png"
   },
 {
@@ -495,7 +495,7 @@
     "մկնատամի խնդիրներ",
     "դաշտանի բացում"
   ],
-  "htmlFile": "yezan-lezoo.html",
+  
   "img": "https://armherbs.com/img/%D5%A5%D5%A6%D5%A1%D5%B6-%D5%AC%D5%A5%D5%A6%D5%B8%D6%82.jpg"
 },
 {
@@ -531,7 +531,7 @@
     "բքնածություն",
     "արյունահոսություն"
   ],
-  "htmlFile": "eznargel-dashtayin.html",
+  
   "img": "https://armherbs.com/img/%D5%A5%D5%A6%D5%B6%D5%A1%D6%80%D5%A3%D5%A5%D5%AC.png"
 },
 {
@@ -574,7 +574,7 @@
     "փորկապություն",
     "բքնածություն"
   ],
-  "htmlFile": "yegherdak-sovorakan.html",
+  
   "img": "https://armherbs.com/img/%D5%A5%D5%B2%D5%A5%D6%80%D5%A4%D5%A1%D5%AF.jpg"
 },
 {
@@ -610,7 +610,7 @@
     "բրոնխիտ",
     "թութք"
   ],
-  "htmlFile": "yeghinj.html",
+  
   "img": "https://armherbs.com/img/%D5%A5%D5%B2%D5%AB%D5%B6%D5%BB.png"
 },
 {
@@ -645,7 +645,7 @@
     "ձայնի խզում",
     "խռպոտություն"
   ],
-  "htmlFile": "tantrveni-sev.html",
+  
   "img": "https://armherbs.com/img/%D5%A9%D5%A1%D5%B6%D5%A9%D6%80%D5%BE%D5%A5%D5%B6%D5%AB.png"
 },
 {
@@ -693,7 +693,7 @@
     "կրծքագեղձերի պնդացում",
     "թրոմբոֆլեբիտ"
   ],
-  "htmlFile": "isharvuyt-deghatu.html",
+  
   "img": "https://armherbs.com/img/%D5%AB%D5%B7%D5%A1%D5%BC%D5%BE%D5%B8%D6%82%D5%B5%D5%BF.png"
 },
 {
@@ -736,7 +736,7 @@
     "օձահարություն",
     "արյան բարձր ճնշում"
   ],
-  "htmlFile": "loshtak-spitak.html",
+  
   "img": "https://armherbs.com/img/%D5%AC%D5%B8%D5%B7%D5%BF%D5%A1%D5%AF.png"
 },
 {
@@ -772,7 +772,7 @@
     "խոցեր",
     "շաքարախտի ժամանակ արյան մեջ շաքարի կարգավորում"
   ],
-  "htmlFile": "loreni.html",
+  
   "img": "https://armherbs.com/img/%D5%AC%D5%B8%D6%80%D5%A5%D5%B6%D5%AB.jpeg"
 },
 {
@@ -808,7 +808,7 @@
     "շաքարախտ",
     "հակաֆուրունկուլյոզ"
   ],
-  "htmlFile": "taraxacum.html",
+  
   "img": "https://armherbs.com/img/%D5%AD%D5%A1%D5%BF%D5%B8%D6%82%D5%BF%D5%AB%D5%AF.jpg"
 },
 {
@@ -885,7 +885,7 @@
     "երիկամների ախտահարումներ",
     "հարբուխ"
   ],
-  "htmlFile": "origanum.html",
+  
   "img": "https://armherbs.com/img/%D5%AD%D5%B6%D5%AF%D5%A1%D5%AE%D5%A1%D5%B2%D5%AB%D5%AF.png"
 },
 {
@@ -963,7 +963,7 @@
     "բերանի վատ հոտ",
     "արյան ճնշման իջեցում"
   ],
-  "htmlFile": "acorus.html",
+  
   "img": "https://armherbs.com/img/%D5%AD%D5%B6%D5%AF%D5%A5%D5%B2%D5%A5%D5%A3.png"
 },
 {
@@ -1044,7 +1044,7 @@
     "մատնաշունչ",
     "փորի բքնածություն"
   ],
-  "htmlFile": "verbascum.html",
+  
   "img": "https://armherbs.com/img/%D5%AD%D5%BC%D5%B6%D5%A4%D5%A1%D5%BF.png"
 },
 {
@@ -1137,7 +1137,7 @@
     "կապույտ հազ",
     "խոցային հիվանդություն"
   ],
-  "htmlFile": "chelidonium.html",
+  
   "img": "https://armherbs.com/img/%D5%AE%D5%AB%D5%AE%D5%A5%D5%BC%D5%B6%D5%A1%D5%AD%D5%B8%D5%BF.jpg"
 },
 {
@@ -1221,7 +1221,7 @@
     "արյան շրջանառության կարգավորում",
     "մարսողության կարգավորում"
   ],
-  "htmlFile": "asparagus.html",
+  
   "img": "https://armherbs.com/img/%D5%AE%D5%B6%D5%A5%D5%A2%D5%A5%D5%AF.png"
 },
 {
@@ -1289,7 +1289,7 @@
     "ստամոքսահյութի կարգավորում",
     "ստամոքսի շարժիչ ֆունկցիայի աշխուժացում"
   ],
-  "htmlFile": "armoracia.html",
+  
   "img": "https://armherbs.com/img/%D5%AE%D5%B8%D5%BE%D5%A1%D5%A2%D5%B8%D5%B2%D5%AF.png"
 },
 {
@@ -1328,7 +1328,7 @@
     "ախորժակի բացակայություն",
     "բերանի խոռոչի բորբոքումներ"
   ],
-  "htmlFile": "dzoreni-sovorakan.html",
+  
   "img": "https://armherbs.com/img/%D5%AE%D5%B8%D6%80%D5%A5%D5%B6%D5%AB.png"
 },
 {
@@ -1372,7 +1372,7 @@
     "նյարդային ցնցումներ",
     "թունավորումներ սնկերով կամ մետաղներով"
   ],
-  "htmlFile": "kaghni.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%A1%D5%B2%D5%B6%D5%AB.png"
 },
 {
@@ -1414,7 +1414,7 @@
     "փղախտ",
     "պիսակ"
   ],
-  "htmlFile": "onopordon.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%A1%D5%B2%D5%B7%D5%B6%D5%A1%D5%AF.png"
 },
 {
@@ -1453,7 +1453,7 @@
     "օձի և կարիճի կծած",
     "C ավիտամինոզ"
   ],
-  "htmlFile": "bidens.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%A1%D5%BF%D5%BE%D5%A1%D5%AC%D5%A5%D5%A6%D5%B8%D6%82.jpeg"
 },
 {
@@ -1494,7 +1494,7 @@
     "ճիճվակրություն",
     "աղեփկանք"
   ],
-  "htmlFile": "valeriana.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%A1%D5%BF%D5%BE%D5%A1%D5%AD%D5%B8%D5%BF.png"
 },
 {
@@ -1538,7 +1538,7 @@
     "թութք",
     "սակավամիզություն"
   ],
-  "htmlFile": "inula.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%B2%D5%B4%D5%B8%D6%82%D5%AD.jpeg"
 },
 {
@@ -1580,7 +1580,7 @@
     "արյունախխում",
     "երիկամների ախտահարումներ"
   ],
-  "htmlFile": "arctium.html",
+  
   "img": "https://armherbs.com/img/%D5%AF%D5%BC%D5%A1%D5%BF%D5%B8%D6%82%D5%AF.jpeg"
 },
 {
@@ -1622,7 +1622,7 @@
     "ցիստիտ",
     "աղեփկանք"
   ],
-  "htmlFile": "achillea.html",
+  
   "img": "https://armherbs.com/img/%D5%B0%D5%A1%D5%A6%D5%A1%D6%80%D5%A1%D5%BF%D5%A5%D6%80%D6%87%D5%B8%D6%82%D5%AF.jpg"
 },
 {
@@ -1652,7 +1652,7 @@
     "վերքեր",
     "սպաստիկ ցավեր"
   ],
-  "htmlFile": "senecio.html",
+  
   "img": "https://armherbs.com/img/%D5%B0%D5%A1%D5%AC%D6%87%D5%B8%D6%80%D5%AB%D5%AF.jpg"
 },
 {
@@ -1691,7 +1691,7 @@
     "մազաթափություն",
     "անգինա և լնդերի բորբոքում"
   ],
-  "htmlFile": "equisetum.html",
+  
   "img": "https://armherbs.com/img/%D5%B1%D5%AB%D5%A1%D5%B1%D5%A5%D5%BF.jpg"
 },
 {
@@ -1728,7 +1728,7 @@
     "թարախային վերքեր",
     "պառկելախոցեր"
   ],
-  "htmlFile": "allium.html",
+  
   "img": "https://armherbs.com/img/%D5%B2%D5%A1%D5%B6%D5%B1%D5%AB%D5%AC.png"
 },
 {
@@ -1764,7 +1764,7 @@
     "լնդախտ",
     "սեռական թուլություն"
   ],
-  "htmlFile": "galium.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A1%D5%AF%D5%A1%D6%80%D5%A4%D5%A1%D5%AD%D5%B8%D5%BF.jpg"
 },
 {
@@ -1800,7 +1800,7 @@
     "խրոնիկական էնտերիտ",
     "ցրտառական հիվանդություններ"
   ],
-  "htmlFile": "prunus.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A1%D5%B4%D5%AD%D5%AB.png"
 },
 {
@@ -1834,7 +1834,7 @@
     "գլխացավ",
     "անքնություն"
   ],
-  "htmlFile": "polygonum.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A1%D5%B6%D5%A4%D5%AB%D5%AF.png"
 },
 {
@@ -1871,7 +1871,7 @@
     "ռադիկուլիտ և հոդային ցավեր",
     "ծերունական տկարություն"
   ],
-  "htmlFile": "rosa.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A1%D5%BD%D6%80%D5%A5%D5%B6%D5%AB.jpeg"
 },
 {
@@ -1899,7 +1899,7 @@
     "երիկամային այտուցներ (որպես միզամուղ)",
     "զարկերակային ճնշման շեղումներ"
   ],
-  "htmlFile": "digitalis.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A1%D5%BF%D5%B6%D5%B8%D6%81%D5%B8%D6%82%D5%AF.png"
 },
 {
@@ -1931,7 +1931,7 @@
     "բերանի լորձաթաղանթի և նշիկների բորբոքումներ",
     "թութք"
   ],
-  "htmlFile": "marrubium.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%A5%D5%B2%D6%80%D5%A1%D5%AE%D5%B8%D6%82%D5%AE.jpeg"
 },
 {
@@ -1963,7 +1963,7 @@
     "թոքային պալարախտ և հազ",
     "դժվար լավացող վերքեր և թարախապալարներ"
   ],
-  "htmlFile": "viscum.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%B2%D5%A1%D5%B4%D5%B8%D6%82%D5%B3.jpeg"
 },
 {
@@ -1993,7 +1993,7 @@
     "երիկամների և միզապարկի բորբոքումներ",
     "հոդացավեր"
   ],
-  "htmlFile": "rubus-caesius.html",
+  
   "img": "https://armherbs.com/img/%D5%B4%D5%B8%D5%B7%D5%A5%D5%B6%D5%AB.png"
 },
 {
@@ -2025,7 +2025,7 @@
     "թութք",
     "ճիճվակրություն"
   ],
-  "htmlFile": "arum.html",
+  
   "img": "https://armherbs.com/img/%D5%B6%D5%BE%D5%AB%D5%AF.png"
 },
 {
@@ -2061,7 +2061,7 @@
     "գլխացավեր",
     "մաշկային հիվանդություններ"
   ],
-  "htmlFile": "echinops.html",
+  
   "img": "https://armherbs.com/img/%D5%B8%D5%A6%D5%B6%D5%A5%D5%B6%D5%AB.png"
 },
 {
@@ -2092,7 +2092,7 @@
     "մաշկային հիվանդություններ (էկզեմա, սնկային ախտահարումներ)",
     "աչքերի բորբոքումներ"
   ],
-  "htmlFile": "thymus.html",
+  
   "img": "https://armherbs.com/img/%D5%B8%D6%82%D6%80%D6%812.jpg"
 },
 {
@@ -2118,7 +2118,7 @@
     "ճառագայթային ախտահարումներ",
     "լուծ (տերևների և ճյուղերի եփուկը)"
   ],
-  "htmlFile": "hippophae.html",
+  
   "img": "https://armherbs.com/img/%D5%B9%D5%AB%D5%B9%D5%AD%D5%A1%D5%B6.jpeg"
 },
 {
@@ -2144,7 +2144,7 @@
     "թութք",
     "ջրգողություն"
   ],
-  "htmlFile": "agropyron.html",
+  
   "img": "https://armherbs.com/img/%D5%BD%D5%A5%D5%A6.jpeg"
 },
 {
@@ -2174,7 +2174,7 @@
     "ավշահանգույցների բորբոքումներ",
     "բարձր ջերմություն"
   ],
-  "htmlFile": "polygonatum.html",
+  
   "img": "https://armherbs.com/img/%D5%BD%D5%AB%D5%B6%D5%A4%D6%80%D5%AB%D5%AF.png"
 },
 {
@@ -2205,7 +2205,7 @@
     "մաշկային հիվանդություններ (քոս, թարախաբշտիկներ)",
     "անդամալուծություն (ծխահարման միջոցով)"
   ],
-  "htmlFile": "peganum.html",
+  
   "img": "https://armherbs.com/img/%D5%BD%D5%BA%D5%A1%D5%B6%D5%A4.png"
 },
 {
@@ -2236,7 +2236,7 @@
     "բերանի խոռոչի բորբոքումներ (ստոմատիտ, գինգիվիտ)",
     "քիթ-ականջ-կոկորդի հիվանդություններ (հայմորիտ, տոնզիլիտ, օտիտ)"
   ],
-  "htmlFile": "hypericum.html",
+  
   "img": "https://armherbs.com/img/%D5%BD%D6%80%D5%B8%D5%B0%D5%B8%D6%82%D5%B6%D5%A4.png"
 },
 {
@@ -2268,7 +2268,7 @@
     "գլխի քոր և թեփոտություն",
     "աթերոսկլերոզ և հիպերտոնիկ հիվանդություն"
   ],
-  "htmlFile": "tussillago.html",
+  
   "img": "https://armherbs.com/img/%D5%BF%D5%A1%D5%BF%D6%80%D5%A1%D5%AF.jpeg"
 },
 {
@@ -2305,7 +2305,7 @@
     "մաշկային խնդիրներ (ֆուրունկուլյոզ, գորտնուկներ)",
     "միզակապություն և դաշտանի բացակայություն"
   ],
-  "htmlFile": "centaurea.html",
+  
   "img": "https://armherbs.com/img/%D5%BF%D5%A5%D6%80%D5%A5%D6%83%D5%B8%D6%82%D5%AF.jpg"
 },
 {
@@ -2330,7 +2330,7 @@
     "միզակապություն և դաշտանի ուշացում",
     "նևրալգիա և կոնքացավ"
   ],
-  "htmlFile": "rubia.html",
+  
   "img": "https://armherbs.com/img/%D5%BF%D5%B8%D6%80%D5%B8%D5%B6.png"
 },
 {
@@ -2356,7 +2356,7 @@
     "թունավոր միջատների խայթոցներ և թունավոր բույսերի հետ շփում",
     "գեղձախտային վերքեր և մաստիտ"
   ],
-  "htmlFile": "althaea.html",
+  
   "img": "https://armherbs.com/img/%D5%BF%D5%B8%D6%82%D5%B2%D5%BF.png"
 },
 {
@@ -2381,7 +2381,7 @@
     "ստամոքսային ցավեր և դիզենտերիա",
     "ատամնացավ"
   ],
-  "htmlFile": "pulsatilla.html",
+  
   "img": "https://armherbs.com/img/%D6%84%D5%B6%D5%A1%D5%AD%D5%B8%D5%BF.png"
 },
 {
@@ -2408,7 +2408,7 @@
     "ատամնացավ",
     "միզարձակման և դաշտանային ցիկլի խանգարումներ"
   ],
-  "htmlFile": "saponaria.html",
+  
   "img": "https://armherbs.com/img/%D6%85%D5%B3%D5%A1%D5%BC%D5%A1%D5%AD%D5%B8%D5%BF.jpg"
 },
 {
@@ -2437,7 +2437,7 @@
     "արտաքին վերքեր, սալջարդ, հոդախախտումներ",
     "ալկոհոլիզմ (համակցված այլ բույսերի հետ)"
   ],
-  "htmlFile": "artemisia.html",
+  
   "img": "https://armherbs.com/img/%D6%85%D5%B7%D5%AB%D5%B6%D5%A4%D6%80.jpeg"
 }
 ] 

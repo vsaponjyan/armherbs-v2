@@ -1,12 +1,13 @@
 // src/queryRewriter.ts
 
 import { SYNONYMS } from "./searchConfig";
+import { distance } from "fastest-levenshtein";
 
 export class QueryRewriter {
 
   private correctTypos(query: string): string {
     const typoMap: Record<string, string> = {
-      // --- ՏԱՌԱՍԽԱԼՆԵՐ (TYPOS) ---
+      // --- TYPOS ---
       "օկտագործել":  "օգտագործել",
       "օգտագործու":  "օգտագործում",
       "առողջութուն": "առողջություն",
@@ -24,7 +25,7 @@ export class QueryRewriter {
       "թիւ":        "թիվ",
       "բժշկութիւն": "բժշկություն",
 
-      // --- ԼԱՏԻՆԱՏԱՌ (TRANSLIT) ---
+      // --- TRANSLIT ---
       "bjishk":     "բժիշկ",
       "bshishk":    "բժիշկ",
       "dexatom":    "դեղատոմս",
@@ -42,11 +43,38 @@ export class QueryRewriter {
       "analgin":    "անալգին",
     };
 
+  //   const words = query.toLowerCase().split(/(\s+)/);
+  //   const corrected = words.map((token) => {
+  //     if (/^\s+$/.test(token)) return token;
+      
+  //     return typoMap[token] ?? token;
+  //   });
+
+  //   return corrected.join("");
+  // }
+  const knownWords = Object.keys(typoMap);
+
     const words = query.toLowerCase().split(/(\s+)/);
     const corrected = words.map((token) => {
       if (/^\s+$/.test(token)) return token;
-      
-      return typoMap[token] ?? token;
+
+      // 1. First we look at typoMap
+      if (typoMap[token]) return typoMap[token];
+
+      // 2. Fallback — Levenshtein
+      let bestMatch = token;
+      let bestDistance = Infinity;
+
+      for (const known of knownWords) {
+        const d = distance(token, known);
+        if (d < bestDistance) {
+          bestDistance = d;
+          bestMatch = known;
+        }
+      }
+
+      // Only if very close (distance <= 2)
+      return bestDistance <= 2 ? typoMap[bestMatch] : token;
     });
 
     return corrected.join("");
@@ -102,10 +130,10 @@ export class QueryRewriter {
     let rewritten = this.correctTypos(query.toLowerCase().trim());
     
 
-    // "գլխացավի համար" → "գլխացավ"
+    // "for a headache" → "headache"
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ի?\s+համար/gi, "$1");
 
-    // "վալերիանով բուժել" → "վալերիան բուժում"
+    // "to treat with valerian" → "valerian treatment"
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ով\s+բուժել/gi, "$1 բուժում");
 
     rewritten = rewritten.replace(
@@ -113,7 +141,7 @@ export class QueryRewriter {
       "$1 օգտագործում"
     );
 
-    // Հեռացնել կրկնվող բառերը (դեդուպլիկացիա)
+    // Remove duplicate words (deduplication)
     const words = rewritten.split(/\s+/).filter(w => w.length > 0);
     return Array.from(new Set(words)).join(" ");
   }
