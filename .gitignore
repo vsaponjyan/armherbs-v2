@@ -1,0 +1,10 @@
+# dependencies
+node_modules/
+
+.env
+venv/
+.DS_Store
+
+.env.production
+
+__pycache__
