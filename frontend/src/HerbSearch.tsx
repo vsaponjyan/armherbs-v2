@@ -10,6 +10,7 @@ import { queryRewriter } from "./queryRewriter";
 import { autoComplete } from "./autoComplete";
 import { herbEntityResolver } from "./herbEntityResolver";
 import * as S from "./HerbSearchStyles";
+import Footer from "./Footer";
 
 interface HerbData {
   id: string;
@@ -148,6 +149,41 @@ export default function HerbSearch() {
     }
   }, [herbsData]);
 
+  
+  useEffect(() => {
+    if (herbsData.length === 0) return;
+
+    const path = window.location.pathname.replace("/", "");
+    
+    if (path === "smart-search") {
+      setView("search");
+    } else if (path && path !== "") {
+      const herb = herbsData.find(h => h.id === path);
+      if (herb) {
+        setSelectedHerb(herb);
+      }
+    }
+
+    // Լսել "back" կոճակի սեղմումը զննարկիչում
+    const handlePopState = () => {
+      const newPath = window.location.pathname.replace("/", "");
+      if (newPath === "smart-search") {
+        setView("search");
+        setSelectedHerb(null);
+      } else if (newPath === "" || newPath === "list") {
+        setView("list");
+        setSelectedHerb(null);
+      } else {
+        const h = herbsData.find(x => x.id === newPath);
+        if (h) setSelectedHerb(h);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [herbsData]);
+  
+
   const filteredHerbs = useMemo(() => {
     const q = localQuery.toLowerCase().trim();
     if (!q) return herbsData;
@@ -179,7 +215,11 @@ export default function HerbSearch() {
               <span
                 key={`${herb.id}-${i}`}
                 style={S.herbLinkInTextStyle}
-                onClick={() => setSelectedHerb(herb)}
+                //onClick={() => setSelectedHerb(herb)}
+                onClick={() => {
+                  setSelectedHerb(herb);
+                  window.history.pushState(null, "", `/${herb.id}`);
+                }}
               >
                 {sub}
               </span>
@@ -299,7 +339,7 @@ export default function HerbSearch() {
         } else {
           setSuggestions([]);
         }
-        //_____________________________________________________________
+        
         
         if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
           const ragResult = await ragEngine.generateAnswer(
@@ -332,17 +372,7 @@ export default function HerbSearch() {
           
 
         }
-        // // entity="herb" դեպքում primaryHerb-ը փոխանցել
-        // // symptom/general դեպքում undefined — AI ազատ է
-        // if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
-        //   setRagResponse(
-        //     await ragEngine.generateAnswer(
-        //       finalQuery,
-        //       enrichedFound,
-        //       entityResult.type === "herb" ? entityResult.herbName : undefined
-        //     )
-        //   );
-        // }
+        
   
         conversationMemory.addTurn(finalQuery, enrichedFound);
       } catch {
@@ -412,9 +442,14 @@ export default function HerbSearch() {
       <div style={S.viewToggleContainer}>
         <button
           style={S.getViewButtonStyle(view === "list")}
+          // onClick={() => {
+          //   setView("list");
+          //   setSelectedHerb(null);
+          // }}
           onClick={() => {
             setView("list");
             setSelectedHerb(null);
+            window.history.pushState(null, "", "/");
           }}
         >
           📚 Բոլոր դեղաբույսերը
@@ -424,6 +459,7 @@ export default function HerbSearch() {
           onClick={() => {
             setView("search");
             setSelectedHerb(null);
+            window.history.pushState(null, "", "/smart-search");
           }}
         >
           🌿 Դեղաբույսերի որոնում հիվանդությամբ
@@ -487,12 +523,15 @@ export default function HerbSearch() {
                 onChange={(e) => setLocalQuery(e.target.value)}
               />
               <div style={S.herbListGridStyle}>
-                {filteredHerbs.map((herb) => (
-                  <button
-                    key={herb.id}
-                    onClick={() => setSelectedHerb(herb)}
-                    style={S.getHerbButtonStyle(false, false)}
-                  >
+                   {filteredHerbs.map((herb) => (
+                    <button
+                      key={herb.id}
+                      onClick={() => {
+                        setSelectedHerb(herb);
+                        window.history.pushState(null, "", `/${herb.id}`); // Ավելացվեց URL-ի թարմացումը
+                      }}
+                      style={S.getHerbButtonStyle(false, false)} 
+                    >
                     <img
                         src={herb.img || "/placeholder-herb.png"}
                         alt={herb.name}
@@ -603,8 +642,12 @@ export default function HerbSearch() {
                             ? S.clickableTitleStyle
                             : { ...S.clickableTitleStyle, cursor: "default", textDecoration: "none" }
                         }
+                        
                         onClick={() => {
-                          if (herbData) setSelectedHerb(herbData);
+                          if (herbData) {
+                            setSelectedHerb(herbData);
+                            window.history.pushState(null, "", `/${herbData.id}`);
+                          }
                         }}
                       >
                         {highlightText(r.name, query)}{" "}
@@ -625,6 +668,7 @@ export default function HerbSearch() {
           )}
         </>
       )}
+      <Footer />
     </div>
   );
 }

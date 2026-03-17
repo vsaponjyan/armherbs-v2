@@ -43,15 +43,7 @@ export class QueryRewriter {
       "analgin":    "անալգին",
     };
 
-  //   const words = query.toLowerCase().split(/(\s+)/);
-  //   const corrected = words.map((token) => {
-  //     if (/^\s+$/.test(token)) return token;
-      
-  //     return typoMap[token] ?? token;
-  //   });
-
-  //   return corrected.join("");
-  // }
+  
   const knownWords = Object.keys(typoMap);
 
     const words = query.toLowerCase().split(/(\s+)/);
