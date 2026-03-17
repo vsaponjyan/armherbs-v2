@@ -299,18 +299,50 @@ export default function HerbSearch() {
         } else {
           setSuggestions([]);
         }
+        //_____________________________________________________________
         
-        // entity="herb" դեպքում primaryHerb-ը փոխանցել
-        // symptom/general դեպքում undefined — AI ազատ է
         if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
-          setRagResponse(
-            await ragEngine.generateAnswer(
-              finalQuery,
-              enrichedFound,
-              entityResult.type === "herb" ? entityResult.herbName : undefined
-            )
+          const ragResult = await ragEngine.generateAnswer(
+            finalQuery,
+            enrichedFound,
+            entityResult.type === "herb" ? entityResult.herbName : undefined
           );
+
+          // ── Semantic Reranking ──────────────────────────────────────
+          // Եթե backend-ը rankedIds է վերադարձրել՝ վերադասավորում ենք
+          if (ragResult.rankedIds && ragResult.rankedIds.length > 0) {
+            const idOrder = ragResult.rankedIds;
+
+            // Վերադասավորում ըստ GPT-ի որոշման
+            const reranked = [...enrichedFound].sort((a, b) => {
+              const aIdx = idOrder.indexOf(a.id);
+              const bIdx = idOrder.indexOf(b.id);
+              // Եթե ID-ն rankedIds-ում չկա՝ վերջ է դնում
+              const aRank = aIdx === -1 ? 999 : aIdx;
+              const bRank = bIdx === -1 ? 999 : bIdx;
+              return aRank - bRank;
+            });
+
+            setResults(reranked);
+            setRagResponse(ragResult);
+          } else {
+            // Fallback — rankedIds չկա, հին կարգը պահում ենք
+            setRagResponse(ragResult);
+          }
+          
+
         }
+        // // entity="herb" դեպքում primaryHerb-ը փոխանցել
+        // // symptom/general դեպքում undefined — AI ազատ է
+        // if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
+        //   setRagResponse(
+        //     await ragEngine.generateAnswer(
+        //       finalQuery,
+        //       enrichedFound,
+        //       entityResult.type === "herb" ? entityResult.herbName : undefined
+        //     )
+        //   );
+        // }
   
         conversationMemory.addTurn(finalQuery, enrichedFound);
       } catch {
