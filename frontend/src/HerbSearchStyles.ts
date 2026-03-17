@@ -331,3 +331,104 @@ export const suggestionButtonStyle: CSSProperties = {
 export const loadingStyle: CSSProperties = { textAlign: "center", marginTop: 50 };
 
 export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
+
+//________________________________________________________________________
+
+export const footerContainerStyle: CSSProperties = {
+  // marginTop: "50px",
+  // padding: "30px 20px",
+  // borderTop: "1px solid #ddd",
+  // textAlign: "center",
+  // backgroundColor: "#fff",
+
+  marginTop: "50px",
+  padding: "15px 20px",
+  border: "groove",
+  textAlign: "center",
+  backgroundColor: "rgb(245, 245, 245)",
+  borderRadius: "9px",
+  borderTop: "19px solid rgb(76, 175, 80)",
+  boxShadow: "0 -3px 12px rgba(76, 175, 80, 0.6), 0 4px 10px rgba(0,0,0,0.1);"
+};
+
+export const footerNavStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "15px",
+  marginBottom: "15px",
+  flexWrap: "wrap",
+};
+
+export const footerButtonStyle: CSSProperties = {
+  background: "none",
+  border: "none",
+  color: "#2e7d32",
+  fontSize: "16px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  textDecoration: "none",
+};
+
+export const footerDividerStyle: CSSProperties = {
+  color: "#ccc",
+};
+
+export const copyrightStyle: CSSProperties = {
+  fontSize: "14px",
+  color: "#666",
+  marginTop: "10px",
+};
+
+export const contactLinkStyle: CSSProperties = {
+  color: "#2e7d32",
+  textDecoration: "none",
+  fontWeight: "bold",
+};
+
+
+// --- ԱՅՍՏԵՂԻՑ ԱՎԵԼԱՑՆՈՒՄ ԵՆՔ ՆՈՐ ՈՃԵՐԸ Modal-ի ՀԱՄԱՐ ---
+
+export const modalOverlayStyle: CSSProperties = {
+  position: "fixed", 
+  top: 0, 
+  left: 0, 
+  right: 0, 
+  bottom: 0,
+  backgroundColor: "rgba(0,0,0,0.7)", 
+  display: "flex",
+  justifyContent: "center", 
+  alignItems: "center", 
+  zIndex: 2000,
+  padding: "20px"
+};
+
+export const modalContentStyle: CSSProperties = {
+  backgroundColor: "white", 
+  padding: "30px", 
+  borderRadius: "12px",
+  maxWidth: "800px", 
+  width: "100%", 
+  maxHeight: "80vh",
+  overflowY: "auto", 
+  position: "relative", 
+  boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+};
+
+export const modalCloseButtonStyle: CSSProperties = {
+  position: "sticky", 
+  top: "0px", 
+  float: "right",
+  backgroundColor: "#f44336", 
+  color: "white", 
+  border: "none",
+  borderRadius: "50%", 
+  width: "30px", 
+  height: "30px",
+  cursor: "pointer", 
+  fontWeight: "bold",
+  zIndex: 10,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center"
+};
