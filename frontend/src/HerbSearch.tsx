@@ -100,7 +100,9 @@ function enrichResult(
 }
 
 export default function HerbSearch() {
-  const [view, setView] = useState<"list" | "search">("list");
+  //const [view, setView] = useState<"list" | "search">("list");
+  // Փոխարինեք սրանով
+  const [view, setView] = useState<"list" | "search" | "terms" | "literature">("list");
   const [localQuery, setLocalQuery] = useState("");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -116,8 +118,20 @@ export default function HerbSearch() {
   const [autocompleteIndex, setAutocompleteIndex] = useState(-1);
   const [rewriteInfo, setRewriteInfo] = useState<string | null>(null);
 
+  // 1. Նոր State-եր
+  const [footerData, setFooterData] = useState<any>(null);
+
   const ragEngine = useRef(new RAGEngine()).current;
   const herbMap = useMemo(() => buildHerbMap(herbsData), [herbsData]);
+
+  //new
+  // ՆՈՐ — regex-երը մեկ անգամ հաշվել
+  const herbRegexMap = useMemo(() =>
+    new Map(herbsData.map(herb => [
+      herb.id,
+      new RegExp(`(${escapeRegExp(herb.name)})`, "gi")
+    ])),
+  [herbsData]);
 
   useEffect(() => {
     setDataLoading(true);
@@ -148,6 +162,73 @@ export default function HerbSearch() {
     }
   }, [herbsData]);
 
+<<<<<<< Updated upstream
+=======
+  
+  useEffect(() => {
+    if (view !== "terms" && view !== "literature") return;
+    if (footerData) return;
+  
+    fetch("/footer_data.json")
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(json => setFooterData(json))
+      .catch(err => console.error("Footer data error:", err));
+  }, [view]);
+
+  
+  const handleNavigate = (newView: string) => {
+    setError(null); // Մաքրել սխալի հաղորդագրությունը
+    setSelectedHerb(null);
+    setView(newView as any);
+    
+    // URL-ի որոշում
+    let path = "/";
+    if (newView === "search") path = "/smart-search"; // Սա միաժամանակ լուծում է նաև ձեր 3-րդ կետը
+    else if (newView === "terms") path = "/terms";
+    else if (newView === "literature") path = "/literature";
+    
+    window.history.pushState(null, "", path);
+    window.scrollTo(0, 0);
+  };
+  
+  useEffect(() => {
+    if (herbsData.length === 0) return;
+
+    const path = window.location.pathname.replace("/", "");
+    
+    if (path === "smart-search") {
+      setView("search");
+    } else if (path === "terms" || path === "literature") {
+      setView(path as any);
+    } else if (path && path !== "") {
+      const herb = herbsData.find(h => h.id === path);
+      if (herb) setSelectedHerb(herb);
+    }
+
+    // Լսել "back" կոճակի սեղմումը զննարկիչում
+    const handlePopState = () => {
+      const newPath = window.location.pathname.replace("/", "");
+      if (newPath === "smart-search") {
+        setView("search");
+        setSelectedHerb(null);
+      } else if (newPath === "" || newPath === "list") {
+        setView("list");
+        setSelectedHerb(null);
+      } else {
+        const h = herbsData.find(x => x.id === newPath);
+        if (h) setSelectedHerb(h);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [herbsData]);
+  
+
+>>>>>>> Stashed changes
   const filteredHerbs = useMemo(() => {
     const q = localQuery.toLowerCase().trim();
     if (!q) return herbsData;
@@ -159,6 +240,7 @@ export default function HerbSearch() {
     );
   }, [herbsData, localQuery]);
 
+  
   
   const renderedAnswer = useMemo(() => {
     if (!ragResponse?.answer) return null;
@@ -172,14 +254,26 @@ export default function HerbSearch() {
           newParts.push(part);
           return;
         }
-        const regex = new RegExp(`(${escapeRegExp(herb.name)})`, "gi");
+        
+        const regex = herbRegexMap.get(herb.id);
+        if (!regex) { newParts.push(part); return; }
+        regex.lastIndex = 0; // "gi" flag-ի դեպքում պարտադիր reset
+
         part.split(regex).forEach((sub, i) => {
           if (sub.toLowerCase() === herb.name.toLowerCase()) {
             newParts.push(
               <span
                 key={`${herb.id}-${i}`}
                 style={S.herbLinkInTextStyle}
+<<<<<<< Updated upstream
                 onClick={() => setSelectedHerb(herb)}
+=======
+                onClick={() => {
+                  setSelectedHerb(herb);
+                  window.history.pushState(null, "", `/${herb.id}`);
+                  window.scrollTo(0, 0);
+                }}
+>>>>>>> Stashed changes
               >
                 {sub}
               </span>
@@ -193,8 +287,7 @@ export default function HerbSearch() {
     });
 
     return parts;
-  }, [ragResponse, herbsData]);
-
+  }, [ragResponse, herbsData, herbRegexMap]); // ← ավելացավ herbRegexMap
   
   const handleSearch = useCallback(
     async (searchQuery?: string) => {
@@ -299,39 +392,40 @@ export default function HerbSearch() {
         } else {
           setSuggestions([]);
         }
+<<<<<<< Updated upstream
         //_____________________________________________________________
+=======
+>>>>>>> Stashed changes
         
         if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
-          const ragResult = await ragEngine.generateAnswer(
-            finalQuery,
-            enrichedFound,
-            entityResult.type === "herb" ? entityResult.herbName : undefined
-          );
+          try {
+            const ragResult = await ragEngine.generateAnswer(
+              finalQuery,
+              enrichedFound,
+              entityResult.type === "herb" ? entityResult.herbName : undefined
+            );
 
-          // ── Semantic Reranking ──────────────────────────────────────
-          // Եթե backend-ը rankedIds է վերադարձրել՝ վերադասավորում ենք
-          if (ragResult.rankedIds && ragResult.rankedIds.length > 0) {
-            const idOrder = ragResult.rankedIds;
-
-            // Վերադասավորում ըստ GPT-ի որոշման
-            const reranked = [...enrichedFound].sort((a, b) => {
-              const aIdx = idOrder.indexOf(a.id);
-              const bIdx = idOrder.indexOf(b.id);
-              // Եթե ID-ն rankedIds-ում չկա՝ վերջ է դնում
-              const aRank = aIdx === -1 ? 999 : aIdx;
-              const bRank = bIdx === -1 ? 999 : bIdx;
-              return aRank - bRank;
-            });
-
-            setResults(reranked);
-            setRagResponse(ragResult);
-          } else {
-            // Fallback — rankedIds չկա, հին կարգը պահում ենք
-            setRagResponse(ragResult);
+            if (ragResult && ragResult.answer) {
+              // Եթե backend-ը rankedIds է վերադարձրել՝ վերադասավորում ենք
+              if (ragResult.rankedIds && ragResult.rankedIds.length > 0) {
+                const idOrder = ragResult.rankedIds;
+                const reranked = [...enrichedFound].sort((a, b) => {
+                  const aIdx = idOrder.indexOf(a.id);
+                  const bIdx = idOrder.indexOf(b.id);
+                  const aRank = aIdx === -1 ? 999 : aIdx;
+                  const bRank = bIdx === -1 ? 999 : bIdx;
+                  return aRank - bRank;
+                });
+                setResults(reranked);
+              }
+              setRagResponse(ragResult);
+            }
+          } catch (ragErr) {
+            // Սա թույլ չի տա, որ AI-ի timeout-ը կոտրի ամբողջ որոնումը
+            console.warn("AI RAG failed silently, but showing results:", ragErr);
           }
-          
-
         }
+<<<<<<< Updated upstream
         // // entity="herb" դեպքում primaryHerb-ը փոխանցել
         // // symptom/general դեպքում undefined — AI ազատ է
         // if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
@@ -343,9 +437,14 @@ export default function HerbSearch() {
         //     )
         //   );
         // }
+=======
+        
+        
+>>>>>>> Stashed changes
   
         conversationMemory.addTurn(finalQuery, enrichedFound);
-      } catch {
+      } catch (err) {
+        console.error("SEARCH ERROR:", err); // ԱՅՍ ՏՈՂԸ ԿԱՐԵՎՈՐ Է
         setError("Որոնման ընթացքում սխալ տեղի ունեցավ");
       } finally {
         setLoading(false);
@@ -407,6 +506,7 @@ export default function HerbSearch() {
     );
 
   return (
+<<<<<<< Updated upstream
     <div style={S.containerStyle}>
       {/* Page Toggle */}
       <div style={S.viewToggleContainer}>
@@ -429,10 +529,34 @@ export default function HerbSearch() {
           🌿 Դեղաբույսերի որոնում հիվանդությամբ
         </button>
       </div>
+=======
+    
+   <div style={S.containerStyle}>
+      {!selectedHerb && (view === "list" || view === "search") && (
+        <div style={S.viewToggleContainer}>
+          <button
+            style={S.getViewButtonStyle(view === "list")}
+            onClick={() => handleNavigate("list")}
+          >
+            📚 Բոլոր դեղաբույսերը
+          </button>
+          <button
+            style={S.getViewButtonStyle(view === "search")}
+            onClick={() => handleNavigate("search")}
+          >
+            🌿 Դեղաբույսերի որոնում հիվանդությամբ
+          </button>
+        </div>
+      )}
+>>>>>>> Stashed changes
 
       {selectedHerb ? (
         <div style={S.selectedHerbCardStyle}>
-          <button onClick={() => setSelectedHerb(null)} style={S.backButtonStyle}>
+          
+          <button 
+              onClick={() => handleNavigate(view)} 
+              style={S.backButtonStyle}
+            >
             ← Ետ գնալ
           </button>
           {selectedHerb.img && (
@@ -440,7 +564,7 @@ export default function HerbSearch() {
                 src={selectedHerb.img}
                 alt={selectedHerb.name}
                 style={S.herbImageStyle}
-                loading="eager"    
+                loading="lazy"     
                 decoding="async"
               />
           )}
@@ -487,12 +611,25 @@ export default function HerbSearch() {
                 onChange={(e) => setLocalQuery(e.target.value)}
               />
               <div style={S.herbListGridStyle}>
+<<<<<<< Updated upstream
                 {filteredHerbs.map((herb) => (
                   <button
                     key={herb.id}
                     onClick={() => setSelectedHerb(herb)}
                     style={S.getHerbButtonStyle(false, false)}
                   >
+=======
+                   {filteredHerbs.map((herb) => (
+                    <button
+                      key={herb.id}
+                      onClick={() => {
+                        setSelectedHerb(herb);
+                        window.history.pushState(null, "", `/${herb.id}`); // Ավելացվեց URL-ի թարմացումը
+                        window.scrollTo(0, 0);
+                      }}
+                      style={S.getHerbButtonStyle(false, false)} 
+                    >
+>>>>>>> Stashed changes
                     <img
                         src={herb.img || "/placeholder-herb.png"}
                         alt={herb.name}
@@ -604,7 +741,15 @@ export default function HerbSearch() {
                             : { ...S.clickableTitleStyle, cursor: "default", textDecoration: "none" }
                         }
                         onClick={() => {
+<<<<<<< Updated upstream
                           if (herbData) setSelectedHerb(herbData);
+=======
+                          if (herbData) {
+                            setSelectedHerb(herbData);
+                            window.history.pushState(null, "", `/${herbData.id}`);
+                            window.scrollTo(0, 0);
+                          }
+>>>>>>> Stashed changes
                         }}
                       >
                         {highlightText(r.name, query)}{" "}
@@ -623,8 +768,39 @@ export default function HerbSearch() {
               </ul>
             </div>
           )}
+          {/* ՏԱՐԲԵՐԱԿ 3: Տերմինների էջ */}
+          {view === ("terms" as any) && (
+            <div style={S.pageContainerStyle}>
+              <h2 style={S.footerTitleStyle}>🌿 Բժշկական Տերմիններ</h2>
+              {footerData?.terms?.map((t: any, i: number) => (
+                <div key={i} style={S.termItemStyle}>
+                  <strong style={S.termNameStyle}>{t.name}</strong>
+                  <p style={S.termTextStyle}>{t.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ՏԱՐԲԵՐԱԿ 4: Գրականության էջ */}
+          {view === ("literature" as any) && (
+            <div style={S.pageContainerStyle}>
+              <h2 style={S.footerTitleStyle}>📚 Օգտագործված Գրականություն</h2>
+              {footerData?.literature?.map((l: string, i: number) => (
+                <p key={i} style={S.literatureItemStyle}>📖 {l}</p>
+              ))}
+            </div>
+          )}
         </>
       )}
+<<<<<<< Updated upstream
+=======
+      {/* <Footer /> */}
+      {/* Footer-ի կանչը Props-երով */}
+      <Footer 
+        currentView={selectedHerb ? "herb-detail" : view} 
+        onNavigate={handleNavigate} 
+      />
+>>>>>>> Stashed changes
     </div>
   );
 }

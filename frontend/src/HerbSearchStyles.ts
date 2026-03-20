@@ -330,4 +330,112 @@ export const suggestionButtonStyle: CSSProperties = {
 
 export const loadingStyle: CSSProperties = { textAlign: "center", marginTop: 50 };
 
+<<<<<<< Updated upstream
 export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
+=======
+export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
+
+//________________________________________________________________________
+
+export const footerContainerStyle: CSSProperties = {
+  
+  marginTop: "50px",
+  padding: "15px 20px",
+  border: "groove",
+  textAlign: "center",
+  backgroundColor: "rgb(245, 245, 245)",
+  borderRadius: "9px",
+  borderTop: "19px solid rgb(76, 175, 80)",
+  boxShadow: "0 -3px 12px rgba(76, 175, 80, 0.6), 0 4px 10px rgba(0,0,0,0.1)"
+};
+
+export const footerNavStyle: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: "15px",
+  marginBottom: "15px",
+  flexWrap: "wrap",
+};
+
+export const footerButtonStyle: CSSProperties = {
+  background: "none",
+  border: "none",
+  color: "#2e7d32",
+  fontSize: "16px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  textDecoration: "none",
+};
+
+export const footerDividerStyle: CSSProperties = {
+  color: "#ccc",
+};
+
+export const copyrightStyle: CSSProperties = {
+  fontSize: "14px",
+  color: "#666",
+  marginTop: "10px",
+};
+
+export const contactLinkStyle: CSSProperties = {
+  color: "#2e7d32",
+  textDecoration: "none",
+  fontWeight: "bold",
+};
+
+
+
+export const pageContainerStyle: CSSProperties = {
+  maxWidth: "900px",
+  margin: "40px auto",
+  padding: "30px",
+  textAlign: "left",
+  minHeight: "60vh",
+  backgroundColor: "#fff",
+  borderRadius: "12px",
+  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+};
+
+export const footerTitleStyle: CSSProperties = {
+  color: "#2e7d32",
+  marginBottom: "30px",
+  fontSize: "28px",
+  fontWeight: "bold",
+  borderBottom: "3px solid #4caf50",
+  display: "inline-block",
+  paddingBottom: "8px",
+};
+
+export const termItemStyle: CSSProperties = {
+  marginBottom: "25px",
+  borderBottom: "1px solid #f0f0f0",
+  paddingBottom: "15px",
+};
+
+export const termNameStyle: CSSProperties = {
+  color: "#2e7d32",
+  fontSize: "19px",
+  display: "block",
+  marginBottom: "8px",
+};
+
+export const termTextStyle: CSSProperties = {
+  marginTop: "5px",
+  color: "#444",
+  lineHeight: "1.7",
+  fontSize: "16px",
+};
+
+export const literatureItemStyle: CSSProperties = {
+  padding: "15px",
+  marginBottom: "12px",
+  backgroundColor: "#f9f9f9",
+  borderRadius: "8px",
+  borderLeft: "5px solid #4caf50",
+  fontSize: "16px",
+  color: "#333",
+  lineHeight: "1.5",
+  boxShadow: "2px 2px 5px rgba(0,0,0,0.02)",
+};
+>>>>>>> Stashed changes

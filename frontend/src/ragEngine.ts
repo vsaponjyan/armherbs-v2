@@ -158,8 +158,9 @@ interface EnrichedResult extends SearchResult {
   chemistry?: string;
 }
 
-const RAG_API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/rag`;
-
+//const RAG_API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/rag`;
+//const RAG_API_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/rag`;
+const RAG_API_URL = `${process.env.REACT_APP_API_URL ?? ""}/api/rag`;
 export class RAGEngine {
 
   shouldTriggerRAG(query: string, results: SearchResult[]): boolean {
@@ -193,7 +194,7 @@ export class RAGEngine {
           context: results.slice(0, 10), // ← 3-ից 10 դարձավ
           primary_herb: primaryHerb ?? null,
         }),
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout(45000),
       });
 
       if (!response.ok) throw new Error("RAG API request failed");

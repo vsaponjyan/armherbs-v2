@@ -17,9 +17,12 @@ export class ConversationMemory {
   private maxHistory     = 5;
   private sessionTimeout = 30 * 60 * 1000;
 
+  
   constructor() {
-    this.autoCleanupIfNeeded();
-    this.loadFromStorage();
+    setTimeout(() => {
+      this.autoCleanupIfNeeded();
+      this.loadFromStorage();
+    }, 0);
   }
 
   addTurn(query: string, results: SearchResult[]) {

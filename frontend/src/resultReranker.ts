@@ -20,10 +20,13 @@ export class ResultReranker {
   private lastCleanup     = 0;
   private cleanupInterval = 5 * 60 * 1000; // 5 րոպե in-memory throttle
 
+
   constructor() {
     this.clickData = new Map();
-    this.autoCleanupIfNeeded(); //App բացելիս ստուգել
-    this.loadFromStorage();
+    setTimeout(() => {
+      this.autoCleanupIfNeeded();
+      this.loadFromStorage();
+    }, 0);
   }
 
   recordClick(query: string, herbId: string) {

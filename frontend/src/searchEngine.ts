@@ -364,9 +364,10 @@ export class HerbSearchEngine {
   }
 
   private stem(word: string): string {
-    if (this.NORMALIZATION_MAP[word]) return this.NORMALIZATION_MAP[word];
+    const lowerWord = word.toLowerCase();
+    if (this.NORMALIZATION_MAP[lowerWord]) return this.NORMALIZATION_MAP[lowerWord];
     if (word.length <= 3) return word;
-    let stemmed = word;
+    let stemmed = lowerWord;
     for (const suffix of ARMENIAN_SUFFIXES) {
       if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
         stemmed = stemmed.slice(0, -suffix.length);
@@ -442,7 +443,7 @@ export class HerbSearchEngine {
       for (const [stemmedKey, syns] of this.STEMMED_SYNONYMS.entries()) {
         if (syns.includes(word) && stemmedKey !== word) {
           expandedSet.add(stemmedKey);
-          syns.forEach((s) => expandedSet.add(s));
+          //syns.forEach((s) => expandedSet.add(s));
         }
       }
     }
@@ -613,44 +614,51 @@ export class HerbSearchEngine {
     if (intent === "HERB_NAME" && lexical < 0.1) score *= 0.5;
     return score;
   }
-
+  //___________________________________________________________________
   async search(
     queryEmbedding: number[],
     queryText: string,
     topK = 5
   ): Promise<SearchResult[]> {
     if (!this.loaded || !this.herbs) await this.loadEmbeddings();
-
+  
     const cacheKey = this.getCacheKey(queryText, topK);
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
-
+  
     const intent = this.detectIntent(queryText);
     const semanticScores = this.herbs!.map((h) =>
       this.cosineSimilarity(queryEmbedding, h.embedding)
     );
-    const minS = Math.min(...semanticScores);
-    const maxS = Math.max(...semanticScores);
-    const range = maxS - minS || 1;
-
+  
+    // --- ՈՒՂՂՈՒՄ 1: Ֆիքսված նորմալիզացիա (Բացարձակ սանդղակ) ---
+    // Սա թույլ չի տա, որ վատ արդյունքը թվա հիանալի միայն նրա համար, որ մյուսներն ավելի վատն են
+    const minAcceptable = 0.12; 
+    const maxExpected = 0.45; 
+  
     const ABSOLUTE_THRESHOLD: Record<QueryIntent, number> = {
-      HERB_NAME:  0.20,
-      SYMPTOM:    0.22,
-      USAGE:      0.22,
-      GENERAL:    0.25,
-      COMPARISON: 0.22,
-      HERB_INFO:  0.22,
+      HERB_NAME:  0.15, // Մեղմացրել ենք Վլադիմիր, որպեսզի "լռություն" չլինի
+      SYMPTOM:    0.16,
+      USAGE:      0.16,
+      GENERAL:    0.18,
+      COMPARISON: 0.16,
+      HERB_INFO:  0.16,
     };
-
+  
     const results = this.herbs!
       .map((herb, idx) => {
         const rawS = semanticScores[idx];
-        const normS = (rawS - minS) / range;
-
+        
+        // Հաշվում ենք նորմալիզացված սքորը ֆիքսված տիրույթում
+        let normS = (rawS - minAcceptable) / (maxExpected - minAcceptable);
+        normS = Math.max(0, Math.min(1, normS)); 
+  
         const nameMatch = this.getNameMatchScore(queryText, herb);
         const hasNameMatch = nameMatch.score > 0;
+  
+        // Եթե անունով համընկնում չկա ԵՎ AI սքորը շատ ցածր է՝ բաց ենք թողնում
         if (!hasNameMatch && rawS < ABSOLUTE_THRESHOLD[intent]) return null;
-
+  
         const weights = FIELD_WEIGHTS[intent] ?? FIELD_WEIGHTS.GENERAL;
         const nameS  = this.fieldLexicalScore(queryText, herb.name);
         const altS   = herb.alternativeNames.length > 0
@@ -663,7 +671,7 @@ export class HerbSearchEngine {
         const usageS = herb.usage
           ? this.fieldLexicalScore(queryText, herb.usage)
           : 0;
-
+  
         const lexScore =
           nameS  * (weights.name             ?? 0) +
           altS   * (weights.alternativeNames ?? 0) +
@@ -672,10 +680,11 @@ export class HerbSearchEngine {
           usageS * (weights.usage            ?? 0.1);
         
         const finalScore = this.hybridScore(normS, lexScore, nameMatch.score, intent);
-
-        const finalThreshold = hasNameMatch ? 0.10 : 0.18;
+  
+        // --- ՈՒՂՂՈՒՄ 2: Մեղմացված վերջնական Threshold ---
+        const finalThreshold = hasNameMatch ? 0.08 : 0.14; 
         if (finalScore < finalThreshold) return null;
-
+  
         return {
           ...herb,
           semanticScore: normS,
@@ -696,12 +705,104 @@ export class HerbSearchEngine {
       })
       .filter((r): r is SearchResult => r !== null)
       .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
-
+  
+    // --- ՈՒՂՂՈՒՄ 3: Դեդուպլիկացիա ՄԻՆՉԵՎ slice անելը ---
+    // Սա երաշխավորում է, որ միշտ կստանանք լավագույն 5 ՏԱՐԲԵՐ բույսերը
     const deduped = this.deduplicateResults(results);
     const result = deduped.slice(0, topK);
+  
     this.saveToCache(cacheKey, result);
     return result;
   }
+
+  // async search(
+  //   queryEmbedding: number[],
+  //   queryText: string,
+  //   topK = 5
+  // ): Promise<SearchResult[]> {
+  //   if (!this.loaded || !this.herbs) await this.loadEmbeddings();
+
+  //   const cacheKey = this.getCacheKey(queryText, topK);
+  //   const cached = this.getFromCache(cacheKey);
+  //   if (cached) return cached;
+
+  //   const intent = this.detectIntent(queryText);
+  //   const semanticScores = this.herbs!.map((h) =>
+  //     this.cosineSimilarity(queryEmbedding, h.embedding)
+  //   );
+  //   const minS = Math.min(...semanticScores);
+  //   const maxS = Math.max(...semanticScores);
+  //   const range = maxS - minS || 1;
+
+  //   const ABSOLUTE_THRESHOLD: Record<QueryIntent, number> = {
+  //     HERB_NAME:  0.20,
+  //     SYMPTOM:    0.22,
+  //     USAGE:      0.22,
+  //     GENERAL:    0.25,
+  //     COMPARISON: 0.22,
+  //     HERB_INFO:  0.22,
+  //   };
+
+  //   const results = this.herbs!
+  //     .map((herb, idx) => {
+  //       const rawS = semanticScores[idx];
+  //       const normS = (rawS - minS) / range;
+
+  //       const nameMatch = this.getNameMatchScore(queryText, herb);
+  //       const hasNameMatch = nameMatch.score > 0;
+  //       if (!hasNameMatch && rawS < ABSOLUTE_THRESHOLD[intent]) return null;
+
+  //       const weights = FIELD_WEIGHTS[intent] ?? FIELD_WEIGHTS.GENERAL;
+  //       const nameS  = this.fieldLexicalScore(queryText, herb.name);
+  //       const altS   = herb.alternativeNames.length > 0
+  //         ? this.fieldLexicalScore(queryText, herb.alternativeNames.join(" "))
+  //         : 0;
+  //       const sympS  = herb.symptoms.length > 0
+  //         ? this.fieldLexicalScore(queryText, herb.symptoms.join(" "))
+  //         : 0;
+  //       const healS  = this.fieldLexicalScore(queryText, herb.healing);
+  //       const usageS = herb.usage
+  //         ? this.fieldLexicalScore(queryText, herb.usage)
+  //         : 0;
+
+  //       const lexScore =
+  //         nameS  * (weights.name             ?? 0) +
+  //         altS   * (weights.alternativeNames ?? 0) +
+  //         sympS  * (weights.symptoms         ?? 0) +
+  //         healS  * (weights.healing          ?? 0) +
+  //         usageS * (weights.usage            ?? 0.1);
+        
+  //       const finalScore = this.hybridScore(normS, lexScore, nameMatch.score, intent);
+
+  //       const finalThreshold = hasNameMatch ? 0.10 : 0.18;
+  //       if (finalScore < finalThreshold) return null;
+
+  //       return {
+  //         ...herb,
+  //         semanticScore: normS,
+  //         lexScore,
+  //         finalScore,
+  //         intent,
+  //         matchType: nameMatch.type || "semantic",
+  //         scoreBreakdown: {
+  //           nameScore:    nameS,
+  //           symptomScore: sympS,
+  //           healingScore: healS,
+  //           semanticRaw:  rawS,
+  //           semanticNorm: normS,
+  //           lexical:      lexScore,
+  //           final:        finalScore,
+  //         },
+  //       } as SearchResult;
+  //     })
+  //     .filter((r): r is SearchResult => r !== null)
+  //     .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+
+  //   const deduped = this.deduplicateResults(results);
+  //   const result = deduped.slice(0, topK);
+  //   this.saveToCache(cacheKey, result);
+  //   return result;
+  // }
 
   private deduplicateResults(results: SearchResult[]): SearchResult[] {
     const seen = new Set<string>();
@@ -712,33 +813,73 @@ export class HerbSearchEngine {
     });
   }
 
+  //___________________________________________________________________
   async findSuggestions(query: string, maxSuggestions = 3): Promise<string[]> {
     if (!this.herbs) return [];
     const qNorm = this.normalize(query, false);
+    // Եթե 2 տառից պակաս է, առաջարկ չենք տալիս
     if (qNorm.length < 2) return [];
-
+  
     const candidates: { name: string; distance: number }[] = [];
-
+  
     for (const herb of this.herbs) {
+      // Որոշում ենք թույլատրելի սխալների քանակը ըստ բառի երկարության
+      let maxAllowed = 0;
+      if (qNorm.length >= 4 && qNorm.length <= 6) maxAllowed = 1;
+      if (qNorm.length > 6) maxAllowed = 2;
+  
+      // Ստուգում ենք հիմնական անունը
       const d = this.levenshteinDistance(qNorm, this.normalize(herb.name, false));
-      if (d <= (qNorm.length <= 4 ? 1 : 2)) {
+      if (d <= maxAllowed) {
         candidates.push({ name: herb.name, distance: d });
         continue;
       }
+  
+      // Ստուգում ենք այլընտրանքային անունները
       for (const alt of herb.alternativeNames) {
         const dAlt = this.levenshteinDistance(qNorm, this.normalize(alt, false));
-        if (dAlt <= (qNorm.length <= 4 ? 1 : 2)) {
+        if (dAlt <= maxAllowed) {
           candidates.push({ name: herb.name, distance: dAlt });
           break;
         }
       }
     }
-
-    return candidates
+  
+    // Զտում ենք նույն անունով թեկնածուներին և վերադարձնում լավագույնները
+    const uniqueResults = Array.from(new Map(candidates.map(c => [c.name, c])).values());
+  
+    return uniqueResults
       .sort((a, b) => a.distance - b.distance)
       .slice(0, maxSuggestions)
       .map((c) => c.name);
   }
+  // async findSuggestions(query: string, maxSuggestions = 3): Promise<string[]> {
+  //   if (!this.herbs) return [];
+  //   const qNorm = this.normalize(query, false);
+  //   if (qNorm.length < 2) return [];
+
+  //   const candidates: { name: string; distance: number }[] = [];
+
+  //   for (const herb of this.herbs) {
+  //     const d = this.levenshteinDistance(qNorm, this.normalize(herb.name, false));
+  //     if (d <= (qNorm.length <= 4 ? 1 : 2)) {
+  //       candidates.push({ name: herb.name, distance: d });
+  //       continue;
+  //     }
+  //     for (const alt of herb.alternativeNames) {
+  //       const dAlt = this.levenshteinDistance(qNorm, this.normalize(alt, false));
+  //       if (dAlt <= (qNorm.length <= 4 ? 1 : 2)) {
+  //         candidates.push({ name: herb.name, distance: dAlt });
+  //         break;
+  //       }
+  //     }
+  //   }
+
+  //   return candidates
+  //     .sort((a, b) => a.distance - b.distance)
+  //     .slice(0, maxSuggestions)
+  //     .map((c) => c.name);
+  // }
 }
 
 export const searchEngine = new HerbSearchEngine();
