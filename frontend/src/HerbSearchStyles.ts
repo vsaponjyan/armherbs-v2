@@ -1,4 +1,3 @@
-
 import { CSSProperties } from "react";
 
 export const containerStyle: CSSProperties = {
@@ -42,7 +41,6 @@ export const backButtonStyle: CSSProperties = {
   fontSize: "14px",
 };
 
-// --- Herb List Page ---
 export const herbListWrapperStyle: CSSProperties = {
   marginBottom: 30,
   padding: 15,
@@ -65,20 +63,18 @@ export const localSearchInputStyle: CSSProperties = {
 
 export const herbListGridStyle: CSSProperties = {
   display: "grid",
-  // Ավտոմատ տեղավորում է քարտերը էկրանի լայնությամբ
   gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", 
   gap: "20px",
   padding: "20px 0",
 };
 
-// Նոր ոճ քարտի ներսի նկարի համար
 export const herbCardImageStyle: CSSProperties = {
   width: "100%",
   height: "120px",
   objectFit: "cover",
   borderRadius: "6px",
   marginBottom: "8px",
-  backgroundColor: "#eee", // placeholder եթե նկարը չկա
+  backgroundColor: "#eee", 
 };
 
 
@@ -94,7 +90,7 @@ export function getHerbButtonStyle(isSelected: boolean, inResults: boolean): CSS
     border: "1px solid #ddd",
     fontWeight: "bold",
     display: "flex",
-    flexDirection: "column", // Նկարը և անունը իրար տակ դնելու համար
+    flexDirection: "column", 
     alignItems: "center",
     textAlign: "center",
     boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
@@ -109,7 +105,6 @@ export function getHerbButtonDefaultBg(inResults: boolean): string {
   return inResults ? "#fff9c4" : "#fff";
 }
 
-// --- Selected Herb Card ---
 export const selectedHerbCardStyle: CSSProperties = {
   marginBottom: 30,
   padding: 20,
@@ -168,7 +163,7 @@ export const tagsWrapperStyle: CSSProperties = {
  gap: "5px" 
 };
 
-// --- Search Interface ---
+
 export const searchInputWrapperStyle: CSSProperties = { position: "relative" };
 
 export function getSearchInputStyle(loading: boolean): CSSProperties {
@@ -203,7 +198,7 @@ export const herbLinkInTextStyle: CSSProperties = {
   textDecoration: "underline",
 };
 
-// --- Results, RAG & Misc ---
+
 export const autocompleteDropdownStyle: CSSProperties = {
   position: "absolute", 
   top: "100%", 
@@ -330,12 +325,8 @@ export const suggestionButtonStyle: CSSProperties = {
 
 export const loadingStyle: CSSProperties = { textAlign: "center", marginTop: 50 };
 
-<<<<<<< Updated upstream
-export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
-=======
 export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
 
-//________________________________________________________________________
 
 export const footerContainerStyle: CSSProperties = {
   
@@ -438,4 +429,4 @@ export const literatureItemStyle: CSSProperties = {
   lineHeight: "1.5",
   boxShadow: "2px 2px 5px rgba(0,0,0,0.02)",
 };
->>>>>>> Stashed changes
+

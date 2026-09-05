@@ -1,5 +1,3 @@
-// src/conversationMemory.ts
-
 import { SearchResult } from "./searchEngine";
 
 interface ConversationTurn {
@@ -56,12 +54,10 @@ export class ConversationMemory {
     return followUpPatterns.some((p) => p.test(query.trim()));
   }
 
-// Փոխանցում ենք ամբողջական բույսերի օբյեկտները
 resolveFollowUp(query: string, herbs: any[] = []): string {
   const lastHerb = this.getLastMentionedHerb();
   if (!lastHerb) return query;
 
-  // ✅ Ստուգում ենք բոլոր հնարավոր տարբերակները (name, altNames, id)
   const isNewHerbMentioned = herbs.some(h => {
     const q = query.toLowerCase();
     const nameMatch = q.includes(h.name.toLowerCase());
@@ -72,13 +68,11 @@ resolveFollowUp(query: string, herbs: any[] = []): string {
     return nameMatch || idMatch || altMatch;
   });
 
-  // Եթե նոր բույս կա հարցման մեջ, հինը ՄԻ՛ ավելացրու
   if (isNewHerbMentioned) {
     return query;
   }
   
-  // ✅ ՆՈՐ — Եթե query-ն ուղղակի բույսի անուն է պարունակում
-  // և USAGE intent ունի — հինը ՄԻ՛ ավելացրու
+  
   const USAGE_PATTERNS = [
     /ինչպես/i, /օգտագործ/i, /պատրաստ/i, /խմել/i, /կիրառ/i, /բուժ/i
   ];

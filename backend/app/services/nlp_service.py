@@ -1,8 +1,6 @@
-# beckend/app/services/nlp_service.py
 import stanza
 from app.config import ARMENIAN_STOPWORDS
 
-# Մեկ անգամ ներբեռնել — միայն եթե չկա
 stanza.download('hy', verbose=False)
 
 class ArmenianNLP:

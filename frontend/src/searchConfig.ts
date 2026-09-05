@@ -1,5 +1,3 @@
-// src/searchConfig.ts
-
 export type QueryIntent =
   | "SYMPTOM"
   | "USAGE"
@@ -312,7 +310,7 @@ export const SYNONYMS: Record<string, string[]> = {
 };
 
 // ===============================
-// Intent detection keywords — անփոփոխ
+// Intent detection keywords
 // ===============================
 export const INTENT_KEYWORDS = {
   USAGE: [
@@ -328,7 +326,7 @@ export const INTENT_KEYWORDS = {
 };
 
 // ===============================
-// Armenian suffixes for stemming — անփոփոխ
+// Armenian suffixes for stemming 
 // ===============================
 export const ARMENIAN_SUFFIXES = [
   "ություններ", "ությունների", "ությունները", "ություններին", "ություններից",

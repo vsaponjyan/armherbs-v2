@@ -1,5 +1,3 @@
-// src/queryRewriter.ts
-
 import { SYNONYMS } from "./searchConfig";
 import { distance } from "fastest-levenshtein";
 
@@ -7,7 +5,7 @@ export class QueryRewriter {
 
   private correctTypos(query: string): string {
     const typoMap: Record<string, string> = {
-      // --- TYPOS ---
+      
       "օկտագործել":  "օգտագործել",
       "օգտագործու":  "օգտագործում",
       "առողջութուն": "առողջություն",
@@ -25,7 +23,7 @@ export class QueryRewriter {
       "թիւ":        "թիվ",
       "բժշկութիւն": "բժշկություն",
 
-      // --- TRANSLIT ---
+      
       "bjishk":     "բժիշկ",
       "bshishk":    "բժիշկ",
       "dexatom":    "դեղատոմս",
@@ -43,25 +41,17 @@ export class QueryRewriter {
       "analgin":    "անալգին",
     };
 
-  //   const words = query.toLowerCase().split(/(\s+)/);
-  //   const corrected = words.map((token) => {
-  //     if (/^\s+$/.test(token)) return token;
-      
-  //     return typoMap[token] ?? token;
-  //   });
-
-  //   return corrected.join("");
-  // }
+  
   const knownWords = Object.keys(typoMap);
 
     const words = query.toLowerCase().split(/(\s+)/);
     const corrected = words.map((token) => {
       if (/^\s+$/.test(token)) return token;
 
-      // 1. First we look at typoMap
+      
       if (typoMap[token]) return typoMap[token];
 
-      // 2. Fallback — Levenshtein
+      
       let bestMatch = token;
       let bestDistance = Infinity;
 
@@ -73,7 +63,7 @@ export class QueryRewriter {
         }
       }
 
-      // Only if very close (distance <= 2)
+      
       return bestDistance <= 2 ? typoMap[bestMatch] : token;
     });
 
@@ -129,11 +119,8 @@ export class QueryRewriter {
   rewriteToCanonical(query: string): string {
     let rewritten = this.correctTypos(query.toLowerCase().trim());
     
-
-    // "for a headache" → "headache"
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ի?\s+համար/gi, "$1");
 
-    // "to treat with valerian" → "valerian treatment"
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ով\s+բուժել/gi, "$1 բուժում");
 
     rewritten = rewritten.replace(
@@ -141,7 +128,6 @@ export class QueryRewriter {
       "$1 օգտագործում"
     );
 
-    // Remove duplicate words (deduplication)
     const words = rewritten.split(/\s+/).filter(w => w.length > 0);
     return Array.from(new Set(words)).join(" ");
   }

@@ -1,15 +1,10 @@
-// src/HerbSearch.tsx
-
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { searchEngine, SearchResult } from "./searchEngine";
-import { embedText } from "./queryEmbedding";
-import { RAGEngine, RAGResponse } from "./ragEngine";
-import { conversationMemory } from "./conversationMemory";
-import { resultReranker } from "./resultReranker";
-import { queryRewriter } from "./queryRewriter";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { RAGEngine } from "./ragEngine";
 import { autoComplete } from "./autoComplete";
 import { herbEntityResolver } from "./herbEntityResolver";
+import { useHerbSearch } from "./useHerbSearch";
 import * as S from "./HerbSearchStyles";
+import Footer from "./Footer";
 
 interface HerbData {
   id: string;
@@ -25,38 +20,52 @@ interface HerbData {
   img: string;
 }
 
-function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+function highlightText(text: string, query: string): (string | JSX.Element)[] | string {
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery) return text;
 
-function highlightText(text: string, query: string) {
-  if (!query.trim()) return text;
-  const queryWords = query
-    .toLowerCase()
+  const queryWords = trimmedQuery
     .split(/\s+/)
-    .filter((w) => w.length > 2)
-    .map((word) => escapeRegExp(word));
+    .filter((word) => word.length > 2);
+
   if (queryWords.length === 0) return text;
-  try {
-    const regex = new RegExp(`(${queryWords.join("|")})`, "gi");
-    return text.split(regex).map((part, idx) => {
-      const isMatch = queryWords.some((escapedWord) => {
-        const unescaped = escapedWord
-          .replace(/\\\\/g, "\\")
-          .replace(/\\(.)/g, "$1");
-        return part.toLowerCase() === unescaped.toLowerCase();
-      });
-      if (isMatch)
-        return (
-          <span key={idx} style={S.highlightStyle}>
-            {part}
-          </span>
-        );
-      return part;
-    });
-  } catch {
-    return text;
+
+  const lowerText = text.toLowerCase();
+  const result: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+
+  while (lastIndex < text.length) {
+    let earliestMatchIndex = -1;
+    let matchLength = 0;
+
+    for (const word of queryWords) {
+      const index = lowerText.indexOf(word, lastIndex);
+      if (index !== -1 && (earliestMatchIndex === -1 || index < earliestMatchIndex)) {
+        earliestMatchIndex = index;
+        matchLength = word.length;
+      }
+    }
+
+    if (earliestMatchIndex === -1) {
+      result.push(text.slice(lastIndex));
+      break;
+    }
+
+    if (earliestMatchIndex > lastIndex) {
+      result.push(text.slice(lastIndex, earliestMatchIndex));
+    }
+
+    const matchText = text.slice(earliestMatchIndex, earliestMatchIndex + matchLength);
+    result.push(
+      <span key={earliestMatchIndex} style={S.highlightStyle}>
+        {matchText}
+      </span>
+    );
+
+    lastIndex = earliestMatchIndex + matchLength;
   }
+
+  return result;
 }
 
 function truncateText(text: string, maxLength = 200): string {
@@ -75,7 +84,7 @@ function MatchBadge({ type }: { type?: "exact" | "fuzzy" | "semantic" }) {
   const labels = { exact: "Ճիշտ", fuzzy: "Մոտավոր", semantic: "Իմաստային" };
   const style = S.matchBadgeStyles[type] || {};
   return (
-    <span style={style}>{labels[type as keyof typeof labels]}</span>
+    <span style={style}>{labels[type]}</span>
   );
 }
 
@@ -83,55 +92,37 @@ function buildHerbMap(herbsData: HerbData[]): Map<string, HerbData> {
   return new Map(herbsData.map((h) => [h.id, h]));
 }
 
-function enrichResult(
-  result: SearchResult,
-  herbMap: Map<string, HerbData>
-): SearchResult {
-  const fullData = herbMap.get(result.id);
-  if (!fullData) return result;
-  return {
-    ...result,
-    healing: fullData.healing,
-    symptoms: fullData.symptoms,
-    alternativeNames: fullData.alternativeNames,
-    usage: fullData.usage,
-    description: fullData.description,
-  } as SearchResult;
-}
-
 export default function HerbSearch() {
-  //const [view, setView] = useState<"list" | "search">("list");
-  // Փոխարինեք սրանով
   const [view, setView] = useState<"list" | "search" | "terms" | "literature">("list");
   const [localQuery, setLocalQuery] = useState("");
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [ragResponse, setRagResponse] = useState<RAGResponse | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [herbsData, setHerbsData] = useState<HerbData[]>([]);
   const [selectedHerb, setSelectedHerb] = useState<HerbData | null>(null);
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const [autocompleteIndex, setAutocompleteIndex] = useState(-1);
-  const [rewriteInfo, setRewriteInfo] = useState<string | null>(null);
-
-  // 1. Նոր State-եր
   const [footerData, setFooterData] = useState<any>(null);
 
   const ragEngine = useRef(new RAGEngine()).current;
   const herbMap = useMemo(() => buildHerbMap(herbsData), [herbsData]);
 
-  //new
-  // ՆՈՐ — regex-երը մեկ անգամ հաշվել
-  const herbRegexMap = useMemo(() =>
-    new Map(herbsData.map(herb => [
-      herb.id,
-      new RegExp(`(${escapeRegExp(herb.name)})`, "gi")
-    ])),
-  [herbsData]);
+  const {
+    results,
+    ragResponse,
+    suggestions,
+    loading: searchLoading,
+    error,
+    rewriteInfo,
+    handleSearch,
+  } = useHerbSearch({
+    query,
+    setQuery,
+    herbsData,
+    herbMap,
+    ragEngine,
+    setAutocompleteSuggestions,
+  });
 
   useEffect(() => {
     setDataLoading(true);
@@ -141,8 +132,8 @@ export default function HerbSearch() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
-       .then((data: HerbData[]) => setHerbsData(data))
-       .catch(() => {
+      .then((data: HerbData[]) => setHerbsData(data))
+      .catch(() => {
         setDataError("Տվյալների բեռնումը ձախողվեց։ Խնդրում ենք թարմացնել էջը։");
       })
       .finally(() => setDataLoading(false));
@@ -162,9 +153,6 @@ export default function HerbSearch() {
     }
   }, [herbsData]);
 
-<<<<<<< Updated upstream
-=======
-  
   useEffect(() => {
     if (view !== "terms" && view !== "literature") return;
     if (footerData) return;
@@ -176,17 +164,14 @@ export default function HerbSearch() {
       })
       .then(json => setFooterData(json))
       .catch(err => console.error("Footer data error:", err));
-  }, [view]);
+  }, [view, footerData]);
 
-  
   const handleNavigate = (newView: string) => {
-    setError(null); // Մաքրել սխալի հաղորդագրությունը
     setSelectedHerb(null);
     setView(newView as any);
     
-    // URL-ի որոշում
     let path = "/";
-    if (newView === "search") path = "/smart-search"; // Սա միաժամանակ լուծում է նաև ձեր 3-րդ կետը
+    if (newView === "search") path = "/smart-search";
     else if (newView === "terms") path = "/terms";
     else if (newView === "literature") path = "/literature";
     
@@ -208,7 +193,6 @@ export default function HerbSearch() {
       if (herb) setSelectedHerb(herb);
     }
 
-    // Լսել "back" կոճակի սեղմումը զննարկիչում
     const handlePopState = () => {
       const newPath = window.location.pathname.replace("/", "");
       if (newPath === "smart-search") {
@@ -226,9 +210,7 @@ export default function HerbSearch() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [herbsData]);
-  
 
->>>>>>> Stashed changes
   const filteredHerbs = useMemo(() => {
     const q = localQuery.toLowerCase().trim();
     if (!q) return herbsData;
@@ -239,224 +221,10 @@ export default function HerbSearch() {
         h.id.toLowerCase().includes(q)
     );
   }, [herbsData, localQuery]);
-
   
-  
-  const renderedAnswer = useMemo(() => {
-    if (!ragResponse?.answer) return null;
-    const text = ragResponse.answer;
-    let parts: (string | JSX.Element)[] = [text];
-
-    herbsData.forEach((herb) => {
-      const newParts: (string | JSX.Element)[] = [];
-      parts.forEach((part) => {
-        if (typeof part !== "string") {
-          newParts.push(part);
-          return;
-        }
-        
-        const regex = herbRegexMap.get(herb.id);
-        if (!regex) { newParts.push(part); return; }
-        regex.lastIndex = 0; // "gi" flag-ի դեպքում պարտադիր reset
-
-        part.split(regex).forEach((sub, i) => {
-          if (sub.toLowerCase() === herb.name.toLowerCase()) {
-            newParts.push(
-              <span
-                key={`${herb.id}-${i}`}
-                style={S.herbLinkInTextStyle}
-<<<<<<< Updated upstream
-                onClick={() => setSelectedHerb(herb)}
-=======
-                onClick={() => {
-                  setSelectedHerb(herb);
-                  window.history.pushState(null, "", `/${herb.id}`);
-                  window.scrollTo(0, 0);
-                }}
->>>>>>> Stashed changes
-              >
-                {sub}
-              </span>
-            );
-          } else if (sub) {
-            newParts.push(sub);
-          }
-        });
-      });
-      parts = newParts;
-    });
-
-    return parts;
-  }, [ragResponse, herbsData, herbRegexMap]); // ← ավելացավ herbRegexMap
-  
-  const handleSearch = useCallback(
-    async (searchQuery?: string) => {
-      let trimmedQuery = (searchQuery ?? query).trim();
-      if (!trimmedQuery) return;
-  
-      setLoading(true);
-      setError(null);
-      setRagResponse(null);
-      setRewriteInfo(null);
-      setAutocompleteSuggestions([]);
-  
-      if (searchQuery && searchQuery.trim() !== query) {
-        setQuery(searchQuery.trim());
-      }
-       
-      try {
-          //  Ստուգում ենք Follow-up-ը՝ հաշվի առնելով բոլոր բույսերի տվյալները
-          if (conversationMemory.isFollowUpQuery(trimmedQuery)) {
-          //  Փոխանցում ենք ամբողջ herbsData-ն
-           const resolved = conversationMemory.resolveFollowUp(trimmedQuery, herbsData);
-          
-          if (resolved !== trimmedQuery) {
-            trimmedQuery = resolved;
-          }
-        }
-
-        // STEP 1 Այժմ կանչում ենք rewrite-ը արդեն «մաքրված» trimmedQuery-ով
-        const rewritten = queryRewriter.rewrite(
-          trimmedQuery,
-          herbsData.map((h) => h.name) //herbsData-> herbsDataRef.current
-        );
-
-        console.log("rewritten.canonical:", rewritten.canonical);
-  
-        // STEP 2 — Entity resolve canonical form-ի վրա
-        const entityResult = herbEntityResolver.resolve(rewritten.canonical);
-  
-        let finalQuery = rewritten.canonical;
-  
-        if (entityResult.type === "herb") {
-          setRewriteInfo(`Բույս՝ "${entityResult.herbName}"`);
-          finalQuery = entityResult.resolvedQuery;
-        } else if (entityResult.type === "symptom") {
-          setRewriteInfo(`Ախտանշան՝ "${entityResult.symptom}"`);
-          finalQuery = entityResult.resolvedQuery;
-        }
-  
-        // STEP 3 — Embedding
-        const queryEmbedding = await embedText(finalQuery);
-        let found = await searchEngine.search(queryEmbedding, finalQuery, 5);
-        found = resultReranker.rerank(finalQuery, found);
-        let enrichedFound = found.map((r) => enrichResult(r, herbMap));
-  
-        // STEP 4 — Entity herb inject եթե results-ում չկա
-        if (
-          entityResult.type === "herb" &&
-          entityResult.herbId &&
-          !enrichedFound.some(
-            (r) => r.id === entityResult.herbId ||
-                   r.name.toLowerCase() === (entityResult.herbName ?? "").toLowerCase()
-          )
-        ) {
-          const directHerb =
-            herbMap.get(entityResult.herbId!) ??
-            herbsData.find(  
-              (h) => h.name.toLowerCase() === (entityResult.herbName ?? "").toLowerCase()
-            );
-  
-          if (directHerb) {
-            const directResult: SearchResult = {
-              ...directHerb,
-              id: directHerb.id,
-              embedding: [],
-              finalScore: 1.0,
-              matchType: "exact",
-            };
-            enrichedFound = [directResult, ...enrichedFound].slice(0, 5);
-          }
-        }
-
-        if (entityResult.type === "herb" && entityResult.herbName) {
-          const entityNameLower = entityResult.herbName.toLowerCase();
-          enrichedFound = enrichedFound.map((r) =>
-            r.id === entityResult.herbId ||
-            r.name.toLowerCase() === entityNameLower
-              ? { ...r, finalScore: 1.0, matchType: "exact" as const }
-              : r
-          );
-          enrichedFound.sort(
-            (a, b) => (b.finalScore ?? 0) - (a.finalScore ?? 0)
-          );
-        }
-  
-        setResults(enrichedFound);
-  
-        if (
-          enrichedFound.length === 0 ||
-          (enrichedFound[0].finalScore ?? 0) < 0.3
-        ) {
-          setSuggestions(await searchEngine.findSuggestions(finalQuery, 3));
-        } else {
-          setSuggestions([]);
-        }
-<<<<<<< Updated upstream
-        //_____________________________________________________________
-=======
->>>>>>> Stashed changes
-        
-        if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
-          try {
-            const ragResult = await ragEngine.generateAnswer(
-              finalQuery,
-              enrichedFound,
-              entityResult.type === "herb" ? entityResult.herbName : undefined
-            );
-
-            if (ragResult && ragResult.answer) {
-              // Եթե backend-ը rankedIds է վերադարձրել՝ վերադասավորում ենք
-              if (ragResult.rankedIds && ragResult.rankedIds.length > 0) {
-                const idOrder = ragResult.rankedIds;
-                const reranked = [...enrichedFound].sort((a, b) => {
-                  const aIdx = idOrder.indexOf(a.id);
-                  const bIdx = idOrder.indexOf(b.id);
-                  const aRank = aIdx === -1 ? 999 : aIdx;
-                  const bRank = bIdx === -1 ? 999 : bIdx;
-                  return aRank - bRank;
-                });
-                setResults(reranked);
-              }
-              setRagResponse(ragResult);
-            }
-          } catch (ragErr) {
-            // Սա թույլ չի տա, որ AI-ի timeout-ը կոտրի ամբողջ որոնումը
-            console.warn("AI RAG failed silently, but showing results:", ragErr);
-          }
-        }
-<<<<<<< Updated upstream
-        // // entity="herb" դեպքում primaryHerb-ը փոխանցել
-        // // symptom/general դեպքում undefined — AI ազատ է
-        // if (ragEngine.shouldTriggerRAG(finalQuery, enrichedFound)) {
-        //   setRagResponse(
-        //     await ragEngine.generateAnswer(
-        //       finalQuery,
-        //       enrichedFound,
-        //       entityResult.type === "herb" ? entityResult.herbName : undefined
-        //     )
-        //   );
-        // }
-=======
-        
-        
->>>>>>> Stashed changes
-  
-        conversationMemory.addTurn(finalQuery, enrichedFound);
-      } catch (err) {
-        console.error("SEARCH ERROR:", err); // ԱՅՍ ՏՈՂԸ ԿԱՐԵՎՈՐ Է
-        setError("Որոնման ընթացքում սխալ տեղի ունեցավ");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [query, herbsData, herbMap, ragEngine] 
-  );
-
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !loading) {
+      if (e.key === "Enter" && !searchLoading) {
         if (
           autocompleteIndex >= 0 &&
           autocompleteSuggestions[autocompleteIndex]
@@ -482,7 +250,7 @@ export default function HerbSearch() {
         setAutocompleteSuggestions([]);
       }
     },
-    [loading, autocompleteIndex, autocompleteSuggestions, handleSearch]
+    [searchLoading, autocompleteIndex, autocompleteSuggestions, handleSearch, setQuery]
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -496,42 +264,11 @@ export default function HerbSearch() {
     }
   };
 
-  
   if (dataLoading) return <div style={S.loadingStyle}>🌿 Բեռնվում է...</div>;
-  if (dataError)
-    return (
-      <div style={S.errorBoxStyle}>
-        ❌ {dataError}
-      </div>
-    );
+  if (dataError) return <div style={S.errorBoxStyle}>❌ {dataError}</div>;
 
   return (
-<<<<<<< Updated upstream
     <div style={S.containerStyle}>
-      {/* Page Toggle */}
-      <div style={S.viewToggleContainer}>
-        <button
-          style={S.getViewButtonStyle(view === "list")}
-          onClick={() => {
-            setView("list");
-            setSelectedHerb(null);
-          }}
-        >
-          📚 Բոլոր դեղաբույսերը
-        </button>
-        <button
-          style={S.getViewButtonStyle(view === "search")}
-          onClick={() => {
-            setView("search");
-            setSelectedHerb(null);
-          }}
-        >
-          🌿 Դեղաբույսերի որոնում հիվանդությամբ
-        </button>
-      </div>
-=======
-    
-   <div style={S.containerStyle}>
       {!selectedHerb && (view === "list" || view === "search") && (
         <div style={S.viewToggleContainer}>
           <button
@@ -548,31 +285,25 @@ export default function HerbSearch() {
           </button>
         </div>
       )}
->>>>>>> Stashed changes
 
       {selectedHerb ? (
         <div style={S.selectedHerbCardStyle}>
-          
-          <button 
-              onClick={() => handleNavigate(view)} 
-              style={S.backButtonStyle}
-            >
+          <button onClick={() => handleNavigate(view)} style={S.backButtonStyle}>
             ← Ետ գնալ
           </button>
           {selectedHerb.img && (
-              <img
-                src={selectedHerb.img}
-                alt={selectedHerb.name}
-                style={S.herbImageStyle}
-                loading="lazy"     
-                decoding="async"
-              />
+            <img
+              src={selectedHerb.img}
+              alt={selectedHerb.name}
+              style={S.herbImageStyle}
+              loading="lazy"     
+              decoding="async"
+            />
           )}
           <h2 style={S.herbNameStyle}>🌿 {selectedHerb.name}</h2>
           {selectedHerb.alternativeNames.length > 0 && (
             <p style={S.altNamesStyle}>
-              <strong>Այլ անուններ:</strong>{" "}
-              {selectedHerb.alternativeNames.join(", ")}
+              <strong>Այլ անուններ:</strong> {selectedHerb.alternativeNames.join(", ")}
             </p>
           )}
           <div style={{ marginTop: 15 }}>
@@ -611,32 +342,23 @@ export default function HerbSearch() {
                 onChange={(e) => setLocalQuery(e.target.value)}
               />
               <div style={S.herbListGridStyle}>
-<<<<<<< Updated upstream
                 {filteredHerbs.map((herb) => (
                   <button
                     key={herb.id}
-                    onClick={() => setSelectedHerb(herb)}
-                    style={S.getHerbButtonStyle(false, false)}
+                    onClick={() => {
+                      setSelectedHerb(herb);
+                      window.history.pushState(null, "", `/${herb.id}`);
+                      window.scrollTo(0, 0);
+                    }}
+                    style={S.getHerbButtonStyle(false, false)} 
                   >
-=======
-                   {filteredHerbs.map((herb) => (
-                    <button
-                      key={herb.id}
-                      onClick={() => {
-                        setSelectedHerb(herb);
-                        window.history.pushState(null, "", `/${herb.id}`); // Ավելացվեց URL-ի թարմացումը
-                        window.scrollTo(0, 0);
-                      }}
-                      style={S.getHerbButtonStyle(false, false)} 
-                    >
->>>>>>> Stashed changes
                     <img
-                        src={herb.img || "/placeholder-herb.png"}
-                        alt={herb.name}
-                        style={S.herbCardImageStyle}
-                        loading="lazy"   
-                        decoding="async"
-                      />
+                      src={herb.img || "/placeholder-herb.png"}
+                      alt={herb.name}
+                      style={S.herbCardImageStyle}
+                      loading="lazy"   
+                      decoding="async"
+                    />
                     <span>{herb.name}</span>
                   </button>
                 ))}
@@ -654,8 +376,8 @@ export default function HerbSearch() {
                   placeholder="օր․ ի՞նչպես կիրառել կատվախոտը, ի՞նչ անել գլխացավի դեպքում"
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  disabled={loading}
-                  style={S.getSearchInputStyle(loading)}
+                  disabled={searchLoading}
+                  style={S.getSearchInputStyle(searchLoading)}
                 />
                 {autocompleteSuggestions.length > 0 && (
                   <div style={S.autocompleteDropdownStyle}>
@@ -680,15 +402,13 @@ export default function HerbSearch() {
               </div>
               <button
                 onClick={() => handleSearch()}
-                disabled={loading}
-                style={S.getSearchButtonStyle(loading)}
+                disabled={searchLoading}
+                style={S.getSearchButtonStyle(searchLoading)}
               >
-                {loading ? "Որոնում է..." : "Որոնել"}
+                {searchLoading ? "Որոնում է..." : "Որոնել"}
               </button>
 
-              {rewriteInfo && (
-                <div style={S.rewriteInfoStyle}>{rewriteInfo}</div>
-              )}
+              {rewriteInfo && <div style={S.rewriteInfoStyle}>{rewriteInfo}</div>}
               {error && <div style={S.errorBoxStyle}>❌ {error}</div>}
 
               {suggestions.length > 0 && (
@@ -711,26 +431,76 @@ export default function HerbSearch() {
                 </div>
               )}
 
-              {ragResponse && renderedAnswer && (
+              {/* Գրագետ AI Պատասխանի հղումների ստացում՝ String.indexOf-ով (Առանց RegExp-ի) */}
+              {ragResponse && (
                 <div style={S.ragBoxStyle}>
                   <h3 style={S.ragTitleStyle}>
                     🤖 Պատասխան{" "}
-                    <span
-                      style={S.getConfidenceBadgeStyle(ragResponse.confidence)}
-                    >
+                    <span style={S.getConfidenceBadgeStyle(ragResponse.confidence)}>
                       {ragResponse.confidence === "high"
                         ? "Բարձր վստահություն"
                         : "Միջին վստահություն"}
                     </span>
                   </h3>
-                  
-                  <p style={S.ragAnswerStyle}>{renderedAnswer}</p>
+                  <p style={S.ragAnswerStyle}>
+                    {(() => {
+                      let parts: (string | JSX.Element)[] = [ragResponse.answer];
+
+                      herbsData.forEach((herb) => {
+                        const herbNameLower = herb.name.toLowerCase();
+                        const newParts: (string | JSX.Element)[] = [];
+
+                        parts.forEach((part) => {
+                          if (typeof part !== "string") {
+                            newParts.push(part);
+                            return;
+                          }
+
+                          let lastIndex = 0;
+                          const partLower = part.toLowerCase();
+
+                          while (lastIndex < part.length) {
+                            const matchIndex = partLower.indexOf(herbNameLower, lastIndex);
+
+                            if (matchIndex === -1) {
+                              newParts.push(part.slice(lastIndex));
+                              break;
+                            }
+
+                            if (matchIndex > lastIndex) {
+                              newParts.push(part.slice(lastIndex, matchIndex));
+                            }
+
+                            const originalText = part.slice(matchIndex, matchIndex + herb.name.length);
+                            
+                            newParts.push(
+                              <span
+                                key={`${herb.id}-${matchIndex}`}
+                                style={S.herbLinkInTextStyle}
+                                onClick={() => {
+                                  setSelectedHerb(herb);
+                                  window.history.pushState(null, "", `/${herb.id}`);
+                                  window.scrollTo(0, 0);
+                                }}
+                              >
+                                {originalText}
+                              </span>
+                            );
+
+                            lastIndex = matchIndex + herb.name.length;
+                          }
+                        });
+                        parts = newParts;
+                      });
+
+                      return parts;
+                    })()}
+                  </p>
                 </div>
               )}
 
               <ul style={S.resultsListStyle}>
                 {results.map((r) => {
-                  //selectedHerb null handling
                   const herbData = herbsData.find((h) => h.id === r.id);
                   return (
                     <li key={r.id} style={S.resultItemStyle}>
@@ -741,15 +511,11 @@ export default function HerbSearch() {
                             : { ...S.clickableTitleStyle, cursor: "default", textDecoration: "none" }
                         }
                         onClick={() => {
-<<<<<<< Updated upstream
-                          if (herbData) setSelectedHerb(herbData);
-=======
                           if (herbData) {
                             setSelectedHerb(herbData);
                             window.history.pushState(null, "", `/${herbData.id}`);
                             window.scrollTo(0, 0);
                           }
->>>>>>> Stashed changes
                         }}
                       >
                         {highlightText(r.name, query)}{" "}
@@ -768,8 +534,8 @@ export default function HerbSearch() {
               </ul>
             </div>
           )}
-          {/* ՏԱՐԲԵՐԱԿ 3: Տերմինների էջ */}
-          {view === ("terms" as any) && (
+
+          {view === "terms" && (
             <div style={S.pageContainerStyle}>
               <h2 style={S.footerTitleStyle}>🌿 Բժշկական Տերմիններ</h2>
               {footerData?.terms?.map((t: any, i: number) => (
@@ -781,8 +547,7 @@ export default function HerbSearch() {
             </div>
           )}
 
-          {/* ՏԱՐԲԵՐԱԿ 4: Գրականության էջ */}
-          {view === ("literature" as any) && (
+          {view === "literature" && (
             <div style={S.pageContainerStyle}>
               <h2 style={S.footerTitleStyle}>📚 Օգտագործված Գրականություն</h2>
               {footerData?.literature?.map((l: string, i: number) => (
@@ -792,17 +557,11 @@ export default function HerbSearch() {
           )}
         </>
       )}
-<<<<<<< Updated upstream
-=======
-      {/* <Footer /> */}
-      {/* Footer-ի կանչը Props-երով */}
+
       <Footer 
         currentView={selectedHerb ? "herb-detail" : view} 
         onNavigate={handleNavigate} 
       />
->>>>>>> Stashed changes
     </div>
   );
 }
-
-

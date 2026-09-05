@@ -1,5 +1,3 @@
-// src/autoComplete.ts
-
 import { SYNONYMS } from "./searchConfig";
 
 interface Herb {
@@ -74,7 +72,6 @@ export class AutoComplete {
       return false;
     };
 
-    // ── Priority 1 — Herb name / altName startsWith ────────────────────
     for (const herb of this.herbs) {
       if (results.length >= maxResults) break;
       if (herb.name.toLowerCase().startsWith(inputLower)) {
@@ -89,7 +86,6 @@ export class AutoComplete {
       }
     }
 
-    // ── Priority 2 — flatSymptoms startsWith ───────────────────────────
     if (results.length < maxResults) {
       for (const symptom of this.flatSymptoms) {
         if (results.length >= maxResults) break;
@@ -99,7 +95,6 @@ export class AutoComplete {
       }
     }
 
-    // ── Priority 3 — Herb name / altName includes ─────────────────────
     if (results.length < maxResults) {
       for (const herb of this.herbs) {
         if (results.length >= maxResults) break;
@@ -116,7 +111,6 @@ export class AutoComplete {
       }
     }
 
-    // ── Priority 4 — flatSymptoms includes ────────────────────────────
     if (results.length < maxResults) {
       for (const symptom of this.flatSymptoms) {
         if (results.length >= maxResults) break;

@@ -1,4 +1,3 @@
-#beckend/build_symptom_index.py
 import json
 import sys
 from pathlib import Path
@@ -6,29 +5,16 @@ from itertools import combinations
 from collections import defaultdict, Counter
 
 
-# 1. Finding the main backend folder
-# scripts/build_symptom_index.py -> .parent (scripts) -> .parent (backend)
 BACKEND_DIR = Path(__file__).parent.parent.resolve()
 
-# 2. We define the DATA folder
 DATA_DIR = BACKEND_DIR / "data"
 
-# 3. We define file addresses
 herbs_data_path = DATA_DIR / "herbs_raw_data.json"
 output_path     = DATA_DIR / "symptom_index.json"
 
 print(f"Reading from: {herbs_data_path}")
 print(f"Writing to: {output_path}")
 
-
-# if not herbs_data_path.exists():
-#     print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
-#     sys.exit(1)
-
-# with open(herbs_data_path, "r", encoding="utf-8") as f:
-#     herbs = json.load(f)
-
-#print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
 if not herbs_data_path.exists():
     print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
     sys.exit(1)
@@ -45,9 +31,6 @@ except Exception as e:
 
 print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
 
-# ===============================
-# Stopwords
-# ===============================
 ARMENIAN_STOPWORDS = {
     "է", "են", "ի", "ու", "եւ", "և", "որ", "դա", "մի", "այն",
     "կա", "կան", "ում", "ից", "ով", "ին", "նաև", "այս", "դեպի",
@@ -64,17 +47,6 @@ def extract_words(text: str) -> list[str]:
         and w.strip(",.։;՝()[]«»") not in ARMENIAN_STOPWORDS
     ]
 
-# ===============================
-# 1. Symptom co-occurrence index
-# ===============================
-symptom_cooccurrence: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-
-# for herb in herbs:
-#     symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
-#     for symptom in symptoms:
-#         for related in symptoms:
-#             if related != symptom:
-#                 symptom_cooccurrence[symptom][related] += 1
 for herb in herbs:
     symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
     for a, b in combinations(symptoms, 2):
@@ -84,7 +56,7 @@ for herb in herbs:
 
 symptom_healing_keywords: dict[str, list[str]] = defaultdict(list)
 
-CONTEXT_WINDOW = 150  # ±150 character around symptom
+CONTEXT_WINDOW = 150  
 
 for herb in herbs:
     symptoms  = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
@@ -97,26 +69,22 @@ for herb in herbs:
         if pos == -1:
             continue
 
-        # ±150 character around context symptom
+        
         context_start = max(0, pos - CONTEXT_WINDOW)
         context_end   = min(len(full_text), pos + len(symptom) + CONTEXT_WINDOW)
         context       = full_text[context_start:context_end]
 
-        #Context words — minus the symptom itself
+        
         context_words = [
             w for w in extract_words(context)
             if w != symptom
         ]
 
-        # Counter — most frequent = most relevant
         counted  = Counter(context_words)
         relevant = [w for w, _ in counted.most_common(6)]
 
         symptom_healing_keywords[symptom].extend(relevant)
 
-# ===============================
-# 3. Herb name index
-# ===============================
 herb_name_index: dict[str, str] = {}
 
 for herb in herbs:
@@ -125,9 +93,6 @@ for herb in herbs:
     for alt in herb.get("alternativeNames", []):
         herb_name_index[alt.strip().lower()] = herb["name"]
 
-# ===============================
-# 4. Field vocabulary per herb
-# ===============================
 herb_vocabulary: dict[str, list[str]] = {}
 
 for herb in herbs:
@@ -141,9 +106,6 @@ for herb in herbs:
 
     herb_vocabulary[name] = symptoms[:6] + words[:8]
 
-# ===============================
-# 5. Assemble final index
-# ===============================
 final_index = {
     "symptom_cooccurrence": {
         symptom: [
@@ -163,9 +125,6 @@ final_index = {
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(final_index, f, ensure_ascii=False, indent=2)
 
-# ===============================
-# Stats
-# ===============================
 print(f"✅ Symptom co-occurrence: {len(final_index['symptom_cooccurrence'])} entries")
 print(f"✅ Symptom keywords:      {len(final_index['symptom_keywords'])} entries")
 print(f"✅ Herb name index:       {len(final_index['herb_name_index'])} entries")

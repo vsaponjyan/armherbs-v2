@@ -1,4 +1,3 @@
-# backend/scripts/generate_embeddings.py
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -8,13 +7,10 @@ import tiktoken
 import sys
 
 
-# scripts/generate_embeddings.py -> parent (scripts) -> parent (backend)
 BACKEND_DIR = Path(__file__).parent.parent.resolve()
 
-# Adding the backend to the Python path
 sys.path.append(str(BACKEND_DIR))
 
-# .env is located one level above the backend (in the root)
 load_dotenv(BACKEND_DIR.parent / ".env")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -23,7 +19,6 @@ enc = tiktoken.get_encoding("cl100k_base")
 DATA_DIR = BACKEND_DIR / "data"
 herbs_data_path = DATA_DIR / "herbs_raw_data.json"
 
-# We save the result in the frontend/public folder.
 public_dir = BACKEND_DIR.parent / 'frontend' / 'public'
 output_path = public_dir / 'herbs_embeddings.json'
 
@@ -37,7 +32,6 @@ def truncate_to_tokens(text: str, max_tokens: int = 8000) -> str:
 def run_embeddings_generation():
     print("🚀 Embeddings-ների ստեղծում սկսված է...\n")
 
-    # Checking for the existence of folders
     if not public_dir.exists():
         print(f"⚠️ ԶԳՈՒՇԱՑՈՒՄ: {public_dir} թղթապանակը չկա, ստեղծվում է...")
         public_dir.mkdir(parents=True, exist_ok=True)
@@ -47,7 +41,6 @@ def run_embeddings_generation():
         print("Համոզվեք, որ herbs_raw_data.json-ը backend/data/ թղթապանակի մեջ է:")
         sys.exit(1)
 
-    # data loading
     try:
         with open(herbs_data_path, 'r', encoding='utf-8') as f:
             herbs_data = json.load(f)
@@ -74,7 +67,6 @@ def run_embeddings_generation():
         Նկարագրություն: {herb.get('description', '')}
         """
 
-        # Precise token-based slicing (for OpenAI's limit)
         combined_text = truncate_to_tokens(combined_text, max_tokens=8000)
 
         try:
@@ -99,7 +91,6 @@ def run_embeddings_generation():
         except Exception as e:
             print(f"❌ Սխալ {herb.get('name', i)}-ի մշակման ժամանակ: {e}")
 
-    # save
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(embeddings_db, f, ensure_ascii=False, indent=2)

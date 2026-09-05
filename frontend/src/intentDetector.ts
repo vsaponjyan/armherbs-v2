@@ -1,5 +1,3 @@
-// src/intentDetector.ts
-
 import { Herb } from "./searchEngine";
 import { QueryIntent, INTENT_KEYWORDS, SYNONYMS, ARMENIAN_SUFFIXES } from "./searchConfig";
 
@@ -40,28 +38,27 @@ export function detectIntent(query: string, herbs?: Herb[]): QueryIntent {
   const qWords   = q.split(/\s+/).map((w) => stem(w));
   const qStemmed = qWords.join(" ");
 
-  // ── USAGE ──────────────────────────────────────────────────────────────
+  
   if (STEMMED_USAGE_KEYWORDS.some((kw) => qStemmed.includes(kw))) {
     return "USAGE";
   }
 
-  // ── COMPARISON ─────────────────────────────────────────────────────────
+ 
   if (/տարբերություն|համեմատ|լավագույն|ավելի լավ|ո՞րը/.test(q)) {
     return "COMPARISON";
   }
 
-  // ── HERB_INFO ──────────────────────────────────────────────────────────
+  
   if (/ի՞նչ է|ի՞նչ ունի|նկարագր|մասին|ինչ բույս/.test(q)) {
     return "HERB_INFO";
   }
 
-  // ── HERB_NAME ──────────────────────────────────────────────────────────
-  // ✅ SYMPTOM-ից առաջ — որ «վալերիան ախտանշաններ»-ը HERB_NAME ստանա
+  
   if (herbs?.some((h) => q.includes(h.name.toLowerCase()))) {
     return "HERB_NAME";
   }
 
-  // ── SYMPTOM ────────────────────────────────────────────────────────────
+  
   const hasSymptomKeyword = STEMMED_SYMPTOM_KEYWORDS.some((kw) =>
     qStemmed.includes(kw)
   );

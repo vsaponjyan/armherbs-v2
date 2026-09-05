@@ -1,5 +1,3 @@
-// src/resultReranker.ts
-
 import { SearchResult } from "./searchEngine";
 
 interface ClickData {
@@ -11,14 +9,14 @@ interface ClickData {
 
 const RERANKER_STORAGE_KEY  = "herb_click_data";
 const AUTO_CLEANUP_KEY       = "herb_reranker_last_cleanup";
-const CLEANUP_INTERVAL       = 24 * 60 * 60 * 1000; // 24 ժամը մեկ
-const MAX_STORAGE_ENTRIES    = 200; // Max entry-ների քանակ
+const CLEANUP_INTERVAL       = 24 * 60 * 60 * 1000; 
+const MAX_STORAGE_ENTRIES    = 200; 
 
 export class ResultReranker {
   private clickData: Map<string, ClickData>;
-  private maxAge          = 7 * 24 * 60 * 60 * 1000; // 7 օր
+  private maxAge          = 7 * 24 * 60 * 60 * 1000; 
   private lastCleanup     = 0;
-  private cleanupInterval = 5 * 60 * 1000; // 5 րոպե in-memory throttle
+  private cleanupInterval = 5 * 60 * 1000; 
 
 
   constructor() {
@@ -78,8 +76,7 @@ export class ResultReranker {
       .sort((a, b) => (b.finalScore ?? 0) - (a.finalScore ?? 0));
   }
 
-  // 24 ժամը մեկ ավտոմատ մաքրում storage-ից
-  // Expired (7 օրից հին) entry-ները ջնջվում են
+
   private autoCleanupIfNeeded(): void {
     try {
       const lastCleanup = parseInt(
@@ -127,17 +124,17 @@ export class ResultReranker {
     }
   }
 
-  //LRU — լցվելու դեպքում ամենահին entry-ն հեռացնել
+  
   private saveToStorage(): void {
     try {
-      // MAX_STORAGE_ENTRIES-ից ավել entry-ներ կան — LRU eviction
+      
       let entries = Array.from(this.clickData.entries());
       if (entries.length > MAX_STORAGE_ENTRIES) {
-        // Sort by lastClicked — ամենահինը վերջում
+        
         entries.sort(([, a], [, b]) => b.lastClicked - a.lastClicked);
-        // Կտրել — թողնել միայն MAX_STORAGE_ENTRIES-ն
+        
         entries = entries.slice(0, MAX_STORAGE_ENTRIES);
-        // clickData-ն էլ թարմացնել
+        
         this.clickData.clear();
         for (const [key, data] of entries) {
           this.clickData.set(key, data);
@@ -153,7 +150,7 @@ export class ResultReranker {
         (e.name === "QuotaExceededError" ||
           e.name === "NS_ERROR_DOM_QUOTA_REACHED")
       ) {
-        // Storage լցված — ամենահին կեսը հեռացնել
+        
         const entries = Array.from(this.clickData.entries()).sort(
           ([, a], [, b]) => b.lastClicked - a.lastClicked
         );
@@ -166,7 +163,7 @@ export class ResultReranker {
         console.warn(
           `⚠️ localStorage լցված — click data-ի հին կեսը հեռացվեց`
         );
-        // Կրկին փորձել
+        
         try {
           localStorage.setItem(
             RERANKER_STORAGE_KEY,

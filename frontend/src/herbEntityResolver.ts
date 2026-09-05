@@ -1,5 +1,3 @@
-// src/herbEntityResolver.ts
-
 import { ARMENIAN_SUFFIXES } from "./searchConfig";
 
 interface HerbInfo {
@@ -21,10 +19,7 @@ export class HerbEntityResolver {
   private herbs: HerbInfo[] = [];
   private symptomIndex = new Map<string, string>();
 
-  // ══════════════════════════════════════════════════════════════
-  // Qualifier բառեր — միայնակ (isolated) token-ի նման ՉեՆ ճանաչվում
-  // Միայն full phrase context-ում են ընդունելի
-  // ══════════════════════════════════════════════════════════════
+  
   private readonly QUALIFIER_WORDS = new Set([
     "վայրի", "անտառային", "լեռնային", "արևելյան", "արևմտյան",
     "սև", "սպիտակ", "կարմիր", "դեղին", "կանաչ",
@@ -77,9 +72,7 @@ export class HerbEntityResolver {
     console.log(`✅ Symptom index built: ${this.symptomIndex.size} unique symptoms`);
   }
 
-  // ══════════════════════════════════════════════════════════════
-  // Helper — ստուգել արդյոք needle բառերը ՀԱՐԱԿԻՑ են haystack-ում
-  // ══════════════════════════════════════════════════════════════
+  
   private hasConsecutiveWords(haystack: string[], needle: string[]): boolean {
     if (needle.length === 0 || needle.length > haystack.length) return false;
     for (let i = 0; i <= haystack.length - needle.length; i++) {
@@ -105,10 +98,10 @@ export class HerbEntityResolver {
     const qStemmed = this.stemPhrase(qLower);
     const qStemmedWords = qStemmed.split(/\s+/);
 
-    // ✅ Հավաքում ենք բոլոր գտնված բույսերը մեկ զանգվածում
+    
     const matches: Array<{ herb: HerbInfo; index: number; matchLength: number }> = [];
 
-    // 1. Phrase-level match 
+    
     for (const herb of this.herbs) {
       const allNames = [herb.name, ...herb.alternativeNames];
       for (const name of allNames) {
@@ -116,7 +109,7 @@ export class HerbEntityResolver {
         const nameStemmed = this.stemPhrase(nameLower);
         const nameStemmedWords = nameStemmed.split(/\s+/).filter(w => w.length >= 2);
 
-        // Ստուգում ենք դիրքը հարցման մեջ
+        
         const pos = qLower.indexOf(nameLower);
         const stemPos = qStemmed.indexOf(nameStemmed);
 
@@ -132,13 +125,13 @@ export class HerbEntityResolver {
           matches.push({
             herb,
             index: consecutivePos,
-            matchLength: nameStemmedWords.length * 5 // Կշիռ ենք տալիս բազմաբառ անուններին
+            matchLength: nameStemmedWords.length * 5 
           });
         }
       }
     }
 
-    // 2. Եթե phrase matches չկան, փորձում ենք Word-by-word (բայց էլի հավաքում ենք բոլորը)
+    
     if (matches.length === 0) {
       const qWords = qLower.split(/\s+/).map(w => w.replace(/[^\p{L}]/gu, "")).filter(w => w.length >= 2);
       
@@ -163,15 +156,12 @@ export class HerbEntityResolver {
 
     
     if (matches.length > 0) {
-      // Longest match wins — ամենաերկար անունով բույսը ամենակոնկրետն է
-      // Last position wins — միայն հավասար երկարության դեպքում
       matches.sort((a, b) => b.matchLength - a.matchLength || b.index - a.index);
       const winner = matches[0].herb;
       console.log(`🎯 Entity Resolved: "${winner.name}" (Longest match wins)`);
       return this.buildHerbResult(winner, query, keepContext);
     }
 
-    // 3. Symptom match (եթե բույս չգտնվեց)
     const symptomMatch = this.findSymptomInQuery(query);
     if (symptomMatch) {
       const resolvedQuery = keepContext ? `${symptomMatch} ${query}`.trim() : symptomMatch;
@@ -221,7 +211,6 @@ export class HerbEntityResolver {
       .split(/\s+/)
       .filter((w) => w.length >= 2);
 
-    // Longest match first (3 բառ → 2 → 1)
     for (let len = 3; len >= 1; len--) {
       for (let i = 0; i <= qWords.length - len; i++) {
         const phrase = qWords.slice(i, i + len).join(" ");

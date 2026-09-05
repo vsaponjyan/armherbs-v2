@@ -1,5 +1,3 @@
-// src/queryEmbedding.ts
-
 //const EMBED_API_URL = "http://localhost:8000/api/embed";
 //const EMBED_API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/embed`;
 //const EMBED_API_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/embed`;
@@ -22,7 +20,7 @@ export async function embedText(text: string): Promise<number[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
-      signal: AbortSignal.timeout(30000), // 🆕 10→15 sec (expansion-ը ժամ է պահանջում)
+      signal: AbortSignal.timeout(30000), 
     });
   } catch (networkError) {
     if (

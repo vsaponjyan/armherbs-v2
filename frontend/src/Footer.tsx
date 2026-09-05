@@ -10,7 +10,6 @@ const Footer: React.FC<FooterProps> = ({ currentView, onNavigate }) => {
   return (
     <footer style={S.footerContainerStyle}>
       <div style={S.footerNavStyle}>
-        {/* «Գլխավոր էջ» կոճակը երևում է միայն այն ժամանակ, երբ մենք search բաժնում չենք */}
         {currentView !== "list" && (
           <>
             <button style={S.footerButtonStyle} onClick={() => onNavigate("list")}>
