@@ -1,142 +1,142 @@
-import json
-import sys
-from pathlib import Path
-from itertools import combinations
-from collections import defaultdict, Counter
+# import json
+# import sys
+# from pathlib import Path
+# from itertools import combinations
+# from collections import defaultdict, Counter
 
 
-BACKEND_DIR = Path(__file__).parent.parent.resolve()
+# BACKEND_DIR = Path(__file__).parent.parent.resolve()
 
-DATA_DIR = BACKEND_DIR / "data"
+# DATA_DIR = BACKEND_DIR / "data"
 
-herbs_data_path = DATA_DIR / "herbs_raw_data.json"
-output_path     = DATA_DIR / "symptom_index.json"
+# herbs_data_path = DATA_DIR / "herbs_raw_data.json"
+# output_path     = DATA_DIR / "symptom_index.json"
 
-print(f"Reading from: {herbs_data_path}")
-print(f"Writing to: {output_path}")
+# print(f"Reading from: {herbs_data_path}")
+# print(f"Writing to: {output_path}")
 
-if not herbs_data_path.exists():
-    print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
-    sys.exit(1)
+# if not herbs_data_path.exists():
+#     print(f"❌ ՍԽԱԼ: {herbs_data_path} չի գտնվել!")
+#     sys.exit(1)
 
-try:
-    with open(herbs_data_path, "r", encoding="utf-8") as f:
-        herbs = json.load(f)
-except json.JSONDecodeError:
-    print(f"❌ ՍԽԱԼ: {herbs_data_path} ֆայլը վնասված է (JSON format error):")
-    sys.exit(1)
-except Exception as e:
-    print(f"❌ Անսպասելի սխալ ֆայլը կարդալիս: {e}")
-    sys.exit(1)
+# try:
+#     with open(herbs_data_path, "r", encoding="utf-8") as f:
+#         herbs = json.load(f)
+# except json.JSONDecodeError:
+#     print(f"❌ ՍԽԱԼ: {herbs_data_path} ֆայլը վնասված է (JSON format error):")
+#     sys.exit(1)
+# except Exception as e:
+#     print(f"❌ Անսպասելի սխալ ֆայլը կարդալիս: {e}")
+#     sys.exit(1)
 
-print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
+# print(f"📚 Բեռնված է {len(herbs)} դեղաբույս\n")
 
-ARMENIAN_STOPWORDS = {
-    "է", "են", "ի", "ու", "եւ", "և", "որ", "դա", "մի", "այն",
-    "կա", "կան", "ում", "ից", "ով", "ին", "նաև", "այս", "դեպի",
-    "համար", "կամ", "մինչ", "բայց", "ապա", "հետո", "նաեւ",
-    "մեջ", "վրա", "տակ", "առ", "ըստ", "ամեն", "ոչ", "ոտ"
-}
+# ARMENIAN_STOPWORDS = {
+#     "է", "են", "ի", "ու", "եւ", "և", "որ", "դա", "մի", "այն",
+#     "կա", "կան", "ում", "ից", "ով", "ին", "նաև", "այս", "դեպի",
+#     "համար", "կամ", "մինչ", "բայց", "ապա", "հետո", "նաեւ",
+#     "մեջ", "վրա", "տակ", "առ", "ըստ", "ամեն", "ոչ", "ոտ"
+# }
 
-def extract_words(text: str) -> list[str]:
-    """Extract 4+ letter words from text, excluding stopwords:"""
-    return [
-        w.strip(",.։;՝()[]«»")
-        for w in text.split()
-        if len(w.strip(",.։;՝()[]«»")) >= 4
-        and w.strip(",.։;՝()[]«»") not in ARMENIAN_STOPWORDS
-    ]
+# def extract_words(text: str) -> list[str]:
+#     """Extract 4+ letter words from text, excluding stopwords:"""
+#     return [
+#         w.strip(",.։;՝()[]«»")
+#         for w in text.split()
+#         if len(w.strip(",.։;՝()[]«»")) >= 4
+#         and w.strip(",.։;՝()[]«»") not in ARMENIAN_STOPWORDS
+#     ]
 
-for herb in herbs:
-    symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
-    for a, b in combinations(symptoms, 2):
-        symptom_cooccurrence[a][b] += 1
-        symptom_cooccurrence[b][a] += 1
+# for herb in herbs:
+#     symptoms = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
+#     for a, b in combinations(symptoms, 2):
+#         symptom_cooccurrence[a][b] += 1
+#         symptom_cooccurrence[b][a] += 1
 
 
-symptom_healing_keywords: dict[str, list[str]] = defaultdict(list)
+# symptom_healing_keywords: dict[str, list[str]] = defaultdict(list)
 
-CONTEXT_WINDOW = 150  
+# CONTEXT_WINDOW = 150  
 
-for herb in herbs:
-    symptoms  = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
-    healing   = herb.get("healing", "").lower()
-    usage     = herb.get("usage", "").lower()
-    full_text = healing + " " + usage
+# for herb in herbs:
+#     symptoms  = [s.strip().lower() for s in herb.get("symptoms", []) if s.strip()]
+#     healing   = herb.get("healing", "").lower()
+#     usage     = herb.get("usage", "").lower()
+#     full_text = healing + " " + usage
 
-    for symptom in symptoms:
-        pos = full_text.find(symptom)
-        if pos == -1:
-            continue
-
-        
-        context_start = max(0, pos - CONTEXT_WINDOW)
-        context_end   = min(len(full_text), pos + len(symptom) + CONTEXT_WINDOW)
-        context       = full_text[context_start:context_end]
+#     for symptom in symptoms:
+#         pos = full_text.find(symptom)
+#         if pos == -1:
+#             continue
 
         
-        context_words = [
-            w for w in extract_words(context)
-            if w != symptom
-        ]
+#         context_start = max(0, pos - CONTEXT_WINDOW)
+#         context_end   = min(len(full_text), pos + len(symptom) + CONTEXT_WINDOW)
+#         context       = full_text[context_start:context_end]
 
-        counted  = Counter(context_words)
-        relevant = [w for w, _ in counted.most_common(6)]
+        
+#         context_words = [
+#             w for w in extract_words(context)
+#             if w != symptom
+#         ]
 
-        symptom_healing_keywords[symptom].extend(relevant)
+#         counted  = Counter(context_words)
+#         relevant = [w for w, _ in counted.most_common(6)]
 
-herb_name_index: dict[str, str] = {}
+#         symptom_healing_keywords[symptom].extend(relevant)
 
-for herb in herbs:
-    canonical = herb["name"].lower()
-    herb_name_index[canonical] = herb["name"]
-    for alt in herb.get("alternativeNames", []):
-        herb_name_index[alt.strip().lower()] = herb["name"]
+# herb_name_index: dict[str, str] = {}
 
-herb_vocabulary: dict[str, list[str]] = {}
+# for herb in herbs:
+#     canonical = herb["name"].lower()
+#     herb_name_index[canonical] = herb["name"]
+#     for alt in herb.get("alternativeNames", []):
+#         herb_name_index[alt.strip().lower()] = herb["name"]
 
-for herb in herbs:
-    name     = herb["name"].lower()
-    healing  = herb.get("healing", "").lower()
-    usage    = herb.get("usage", "").lower()
-    symptoms = [s.lower() for s in herb.get("symptoms", [])]
+# herb_vocabulary: dict[str, list[str]] = {}
 
-    full  = healing + " " + usage
-    words = list(dict.fromkeys(extract_words(full)))  # dedup, order-preserved
+# for herb in herbs:
+#     name     = herb["name"].lower()
+#     healing  = herb.get("healing", "").lower()
+#     usage    = herb.get("usage", "").lower()
+#     symptoms = [s.lower() for s in herb.get("symptoms", [])]
 
-    herb_vocabulary[name] = symptoms[:6] + words[:8]
+#     full  = healing + " " + usage
+#     words = list(dict.fromkeys(extract_words(full)))  # dedup, order-preserved
 
-final_index = {
-    "symptom_cooccurrence": {
-        symptom: [
-            item[0]
-            for item in sorted(related.items(), key=lambda x: -x[1])[:5]
-        ]
-        for symptom, related in symptom_cooccurrence.items()
-    },
-    "symptom_keywords": {
-        symptom: list(dict.fromkeys(keywords))[:8]
-        for symptom, keywords in symptom_healing_keywords.items()
-    },
-    "herb_name_index": herb_name_index,
-    "herb_vocabulary": herb_vocabulary,
-}
+#     herb_vocabulary[name] = symptoms[:6] + words[:8]
 
-with open(output_path, "w", encoding="utf-8") as f:
-    json.dump(final_index, f, ensure_ascii=False, indent=2)
+# final_index = {
+#     "symptom_cooccurrence": {
+#         symptom: [
+#             item[0]
+#             for item in sorted(related.items(), key=lambda x: -x[1])[:5]
+#         ]
+#         for symptom, related in symptom_cooccurrence.items()
+#     },
+#     "symptom_keywords": {
+#         symptom: list(dict.fromkeys(keywords))[:8]
+#         for symptom, keywords in symptom_healing_keywords.items()
+#     },
+#     "herb_name_index": herb_name_index,
+#     "herb_vocabulary": herb_vocabulary,
+# }
 
-print(f"✅ Symptom co-occurrence: {len(final_index['symptom_cooccurrence'])} entries")
-print(f"✅ Symptom keywords:      {len(final_index['symptom_keywords'])} entries")
-print(f"✅ Herb name index:       {len(final_index['herb_name_index'])} entries")
-print(f"✅ Herb vocabulary:       {len(final_index['herb_vocabulary'])} entries")
-print(f"\n📁 Saved → {output_path}")
-print("\n🔍 Sample expansions:")
+# with open(output_path, "w", encoding="utf-8") as f:
+#     json.dump(final_index, f, ensure_ascii=False, indent=2)
 
-sample_symptoms = list(final_index["symptom_cooccurrence"].keys())[:3]
-for s in sample_symptoms:
-    co   = final_index["symptom_cooccurrence"].get(s, [])
-    keys = final_index["symptom_keywords"].get(s, [])
-    print(f"  '{s}' → co-occur: {co[:3]} | keywords: {keys[:3]}")
+# print(f"✅ Symptom co-occurrence: {len(final_index['symptom_cooccurrence'])} entries")
+# print(f"✅ Symptom keywords:      {len(final_index['symptom_keywords'])} entries")
+# print(f"✅ Herb name index:       {len(final_index['herb_name_index'])} entries")
+# print(f"✅ Herb vocabulary:       {len(final_index['herb_vocabulary'])} entries")
+# print(f"\n📁 Saved → {output_path}")
+# print("\n🔍 Sample expansions:")
 
-# ✅ Ready to run:
-# ./venv/bin/python scripts/build_symptom_index.py
+# sample_symptoms = list(final_index["symptom_cooccurrence"].keys())[:3]
+# for s in sample_symptoms:
+#     co   = final_index["symptom_cooccurrence"].get(s, [])
+#     keys = final_index["symptom_keywords"].get(s, [])
+#     print(f"  '{s}' → co-occur: {co[:3]} | keywords: {keys[:3]}")
+
+# # ✅ Ready to run:
+# # ./venv/bin/python scripts/build_symptom_index.py

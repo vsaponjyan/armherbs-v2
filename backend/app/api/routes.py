@@ -23,7 +23,15 @@ class RAGRequest(BaseModel):
     query: str
     context: list[dict]
     primary_herb: str | None = None
+#_____________________________________
+class ConversationTurnDTO(BaseModel):
+    query: str
+    herb_name: str | None = None
 
+class ResolveContextRequest(BaseModel):
+    query: str
+    history: list[ConversationTurnDTO] = []
+#_____________________________________    
 
 @router.post("/embed")
 async def embed(request: EmbedRequest):
@@ -123,7 +131,46 @@ async def generate_rag_answer(request: RAGRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+#_____________________________________________________________________________
+@router.post("/resolve-context")
+async def resolve_context(request: ResolveContextRequest):
+    if not request.history:
+        return {"resolved_query": request.query, "is_follow_up": False}
 
+    history_text = ""
+    for i, turn in enumerate(request.history):
+        history_text += f"{i+1}. Հարցում: \"{turn.query}\""
+        if turn.herb_name:
+            history_text += f" → Քննարկված բույս: {turn.herb_name}"
+        history_text += "\n"
+
+    system_prompt = (
+        "Դու օգնում ես բուսաբուժության որոնողական համակարգին։\n"
+        "Քեզ կտրվի խոսակցության ամբողջ պատմությունը (հին→նոր հերթականությամբ) "
+        "և վերջին, նոր հարցումը։\n"
+        "Որոշիր՝ արդյոք նոր հարցումը կախված է նախորդ համատեքստից "
+        "(օր. պարունակում է դերանուն, հղում կամ թերի միտք, "
+        "որը հասկանալի է միայն պատմության հետ համատեղ)։\n"
+        "Եթե այո՝ վերաշարադրիր հարցումն ինքնուրույն, ամբողջական տեսքով, "
+        "օգտագործելով ամենավերջին համապատասխան համատեքստը պատմությունից։\n"
+        "Եթե ոչ (հարցումն արդեն ինքնուրույն է, կամ նոր թեմա է)՝ վերադարձրու անփոփոխ։\n"
+        "Պատասխանիր ՄԻԱՅՆ JSON՝ {\"resolved_query\": \"...\", \"is_follow_up\": true/false}"
+    )
+    user_prompt = (
+        f"Պատմություն:\n{history_text}\n"
+        f"Նոր հարցում: {request.query}"
+    )
+
+    try:
+        raw = await ai_service.resolve_context(system_prompt, user_prompt)
+        data = json.loads(raw)
+        return {
+            "resolved_query": data.get("resolved_query", request.query),
+            "is_follow_up": data.get("is_follow_up", False),
+        }
+    except Exception:
+        return {"resolved_query": request.query, "is_follow_up": False}
+#_____________________________________________________________________________
 def initialize_services():
     """
     Server-ի բացումից առաջ բոլոր ծանր գործիքները բեռնում ենք։

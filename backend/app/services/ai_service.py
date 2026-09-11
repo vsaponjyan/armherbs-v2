@@ -35,3 +35,16 @@ class AIService:
         )
         answer = response.choices[0].message.content
         return answer.strip()
+
+    #new added
+    async def resolve_context(self, system_prompt: str, user_prompt: str) -> str:
+        """Օգտագործվում է conversation context-ը լուծելու համար (follow-up query resolution)."""
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user",   "content": user_prompt},
+            ],
+            temperature=0,
+        )
+        return response.choices[0].message.content.strip()   

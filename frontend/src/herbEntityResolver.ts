@@ -131,28 +131,28 @@ export class HerbEntityResolver {
       }
     }
 
-    
-    if (matches.length === 0) {
-      const qWords = qLower.split(/\s+/).map(w => w.replace(/[^\p{L}]/gu, "")).filter(w => w.length >= 2);
+    //           removed
+    // if (matches.length === 0) {
+    //   const qWords = qLower.split(/\s+/).map(w => w.replace(/[^\p{L}]/gu, "")).filter(w => w.length >= 2);
       
-      qWords.forEach((qWord, qIdx) => {
-        const normalized = this.normalizeWord(qWord);
-        if (this.QUALIFIER_WORDS.has(normalized)) return;
+    //   qWords.forEach((qWord, qIdx) => {
+    //     const normalized = this.normalizeWord(qWord);
+    //     if (this.QUALIFIER_WORDS.has(normalized)) return;
 
-        const qStem = this.stemWord(qWord);
-        if (qStem.length < 3) return;
+    //     const qStem = this.stemWord(qWord);
+    //     if (qStem.length < 3) return;
 
-        for (const herb of this.herbs) {
-          const nameWords = herb.name.toLowerCase().split(/\s+/).map(w => this.stemWord(w));
-          const nameMatch = nameWords.some(nw => nw === qStem || (nw.length >= 4 && nw.startsWith(qStem)));
-          const idMatch = herb.id.toLowerCase() === qWord.toLowerCase();
+    //     for (const herb of this.herbs) {
+    //       const nameWords = herb.name.toLowerCase().split(/\s+/).map(w => this.stemWord(w));
+    //       const nameMatch = nameWords.some(nw => nw === qStem || (nw.length >= 4 && nw.startsWith(qStem)));
+    //       const idMatch = herb.id.toLowerCase() === qWord.toLowerCase();
 
-          if (nameMatch || idMatch) {
-            matches.push({ herb, index: qIdx, matchLength: qWord.length });
-          }
-        }
-      });
-    }
+    //       if (nameMatch || idMatch) {
+    //         matches.push({ herb, index: qIdx, matchLength: qWord.length });
+    //       }
+    //     }
+    //   });
+    // }
 
     
     if (matches.length > 0) {
@@ -187,22 +187,40 @@ export class HerbEntityResolver {
     return { type: "herb", herbName: herb.name, herbId: herb.id, resolvedQuery };
   }
 
+  // private removeHerbFromQuery(query: string, herb: HerbInfo): string {
+  //   let cleaned = query.toLowerCase();
+  //   const namesToRemove = [
+  //     herb.name.toLowerCase(),
+  //     herb.id.toLowerCase(),
+  //     ...herb.alternativeNames.map((a) => a.toLowerCase()),
+  //   ];
+  //   for (const name of namesToRemove) {
+  //     cleaned = cleaned.replace(name, "");
+  //     const nameStem = this.stemWord(name);
+  //     if (nameStem.length >= 3) {
+  //       const regex = new RegExp(`${nameStem}[\\p{L}]*`, "giu");
+  //       cleaned = cleaned.replace(regex, "");
+  //     }
+  //   }
+  //   return cleaned.replace(/\s+/g, " ").trim();
+  // }
   private removeHerbFromQuery(query: string, herb: HerbInfo): string {
-    let cleaned = query.toLowerCase();
-    const namesToRemove = [
-      herb.name.toLowerCase(),
-      herb.id.toLowerCase(),
-      ...herb.alternativeNames.map((a) => a.toLowerCase()),
-    ];
+    const namesToRemove = [herb.name, herb.id, ...herb.alternativeNames];
+    const stemsToRemove = new Set<string>();
+  
     for (const name of namesToRemove) {
-      cleaned = cleaned.replace(name, "");
-      const nameStem = this.stemWord(name);
-      if (nameStem.length >= 3) {
-        const regex = new RegExp(`${nameStem}[\\p{L}]*`, "giu");
-        cleaned = cleaned.replace(regex, "");
+      for (const word of name.toLowerCase().split(/\s+/)) {
+        const stemmed = this.stemWord(word);
+        if (stemmed.length >= 3) stemsToRemove.add(stemmed);
       }
     }
-    return cleaned.replace(/\s+/g, " ").trim();
+  
+    const remainingWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => !stemsToRemove.has(this.stemWord(word)));
+  
+    return remainingWords.join(" ").trim();
   }
 
   private findSymptomInQuery(query: string): string | null {

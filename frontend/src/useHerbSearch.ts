@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { SearchResult, searchEngine } from "./searchEngine";
 import { RAGResponse, RAGEngine } from "./ragEngine";
-import { conversationMemory } from "./conversationMemory";
+import { conversationMemory } from "./conversationMemory";// added
+import { resolveContext } from "./resolveContext";
 import { queryRewriter } from "./queryRewriter";
 import { herbEntityResolver } from "./herbEntityResolver";
 import { embedText } from "./queryEmbedding";
@@ -74,13 +75,22 @@ export function useHerbSearch({
       }
 
       try {
-        if (conversationMemory.isFollowUpQuery(trimmedQuery)) {
-          const resolved = conversationMemory.resolveFollowUp(trimmedQuery, herbsData);
-          if (resolved !== trimmedQuery) {
-            trimmedQuery = resolved;
-          }
+        // if (conversationMemory.isFollowUpQuery(trimmedQuery)) {
+        //   const resolved = conversationMemory.resolveFollowUp(trimmedQuery, herbsData);
+        //   if (resolved !== trimmedQuery) {
+        //     trimmedQuery = resolved;
+        //   }
+        // }
+        // ՆՈՐ.
+        const contextResult = await resolveContext(
+          trimmedQuery,
+          conversationMemory.getHistory()
+        );
+        if (contextResult.isFollowUp) {
+          trimmedQuery = contextResult.resolvedQuery;
+          setRewriteInfo(`Համատեքստից՝ "${trimmedQuery}"`);
         }
-
+        //________________________________________________________________
         const rewritten = queryRewriter.rewrite(
           trimmedQuery,
           herbsData.map((h) => h.name)
@@ -176,7 +186,12 @@ export function useHerbSearch({
           }
         }
 
-        conversationMemory.addTurn(finalQuery, enrichedFound);
+        //conversationMemory.addTurn(finalQuery, enrichedFound);
+        conversationMemory.addTurn(
+          finalQuery,
+          enrichedFound,
+          entityResult.type === "herb" ? entityResult.herbName : undefined
+        );
       } catch (err) {
         console.error("SEARCH ERROR:", err);
         setError("Որոնման ընթացքում սխալ տեղի ունեցավ");

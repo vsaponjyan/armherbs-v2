@@ -32,3 +32,7 @@ if __name__ == "__main__":
 
 # ✅ Ready to run:
 # ./venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# source venv/bin/activate
+#python -m uvicorn main:app --reload
+
+

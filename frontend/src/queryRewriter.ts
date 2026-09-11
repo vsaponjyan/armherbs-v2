@@ -1,74 +1,74 @@
 import { SYNONYMS } from "./searchConfig";
-import { distance } from "fastest-levenshtein";
+//import { distance } from "fastest-levenshtein";
 
 export class QueryRewriter {
 
-  private correctTypos(query: string): string {
-    const typoMap: Record<string, string> = {
+  // private correctTypos(query: string): string {
+  //   const typoMap: Record<string, string> = {
       
-      "օկտագործել":  "օգտագործել",
-      "օգտագործու":  "օգտագործում",
-      "առողջութուն": "առողջություն",
-      "առոխջություն": "առողջություն",
-      "դեխատոմս":    "դեղատոմս",
-      "հիվանթ":      "հիվանդ",
-      "հիվնադ":      "հիվանդ",
-      "վիտամն":      "վիտամին",
-      "դեխորայք":    "դեղորայք",
-      "դեղորայկ":    "դեղորայք",
-      "արուն":       "արյուն",
-      "գլխացաւ":    "գլխացավ",
-      "նիւթ":       "նյութ",
-      "արիւն":      "արյուն",
-      "թիւ":        "թիվ",
-      "բժշկութիւն": "բժշկություն",
+  //     "օկտագործել":  "օգտագործել",
+  //     "օգտագործու":  "օգտագործում",
+  //     "առողջութուն": "առողջություն",
+  //     "առոխջություն": "առողջություն",
+  //     "դեխատոմս":    "դեղատոմս",
+  //     "հիվանթ":      "հիվանդ",
+  //     "հիվնադ":      "հիվանդ",
+  //     "վիտամն":      "վիտամին",
+  //     "դեխորայք":    "դեղորայք",
+  //     "դեղորայկ":    "դեղորայք",
+  //     "արուն":       "արյուն",
+  //     "գլխացաւ":    "գլխացավ",
+  //     "նիւթ":       "նյութ",
+  //     "արիւն":      "արյուն",
+  //     "թիւ":        "թիվ",
+  //     "բժշկութիւն": "բժշկություն",
 
       
-      "bjishk":     "բժիշկ",
-      "bshishk":    "բժիշկ",
-      "dexatom":    "դեղատոմս",
-      "deghatom":   "դեղատոմս",
-      "hivand":     "հիվանդ",
-      "stamoqs":    "ստամոքս",
-      "stamoqx":    "ստամոքս",
-      "glxacav":    "գլխացավ",
-      "aroxjutyun": "առողջություն",
-      "aroghjutyun":"առողջություն",
-      "dexer":      "դեղեր",
-      "degher":     "դեղեր",
-      "vax":        "վախ",
-      "citramon":   "ցիտրամոն",
-      "analgin":    "անալգին",
-    };
+  //     "bjishk":     "բժիշկ",
+  //     "bshishk":    "բժիշկ",
+  //     "dexatom":    "դեղատոմս",
+  //     "deghatom":   "դեղատոմս",
+  //     "hivand":     "հիվանդ",
+  //     "stamoqs":    "ստամոքս",
+  //     "stamoqx":    "ստամոքս",
+  //     "glxacav":    "գլխացավ",
+  //     "aroxjutyun": "առողջություն",
+  //     "aroghjutyun":"առողջություն",
+  //     "dexer":      "դեղեր",
+  //     "degher":     "դեղեր",
+  //     "vax":        "վախ",
+  //     "citramon":   "ցիտրամոն",
+  //     "analgin":    "անալգին",
+  //   };
 
   
-  const knownWords = Object.keys(typoMap);
+  // const knownWords = Object.keys(typoMap);
 
-    const words = query.toLowerCase().split(/(\s+)/);
-    const corrected = words.map((token) => {
-      if (/^\s+$/.test(token)) return token;
-
-      
-      if (typoMap[token]) return typoMap[token];
+  //   const words = query.toLowerCase().split(/(\s+)/);
+  //   const corrected = words.map((token) => {
+  //     if (/^\s+$/.test(token)) return token;
 
       
-      let bestMatch = token;
-      let bestDistance = Infinity;
-
-      for (const known of knownWords) {
-        const d = distance(token, known);
-        if (d < bestDistance) {
-          bestDistance = d;
-          bestMatch = known;
-        }
-      }
+  //     if (typoMap[token]) return typoMap[token];
 
       
-      return bestDistance <= 2 ? typoMap[bestMatch] : token;
-    });
+  //     let bestMatch = token;
+  //     let bestDistance = Infinity;
 
-    return corrected.join("");
-  }
+  //     for (const known of knownWords) {
+  //       const d = distance(token, known);
+  //       if (d < bestDistance) {
+  //         bestDistance = d;
+  //         bestMatch = known;
+  //       }
+  //     }
+
+      
+  //     return bestDistance <= 2 ? typoMap[bestMatch] : token;
+  //   });
+
+  //   return corrected.join("");
+  // }
 
   expandQuery(query: string): string[] {
     const normalized = query.toLowerCase().trim();
@@ -117,8 +117,9 @@ export class QueryRewriter {
   }
   
   rewriteToCanonical(query: string): string {
-    let rewritten = this.correctTypos(query.toLowerCase().trim());
-    
+    //let rewritten = this.correctTypos(query.toLowerCase().trim());
+    let rewritten = query.toLowerCase().trim();
+
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ի?\s+համար/gi, "$1");
 
     rewritten = rewritten.replace(/([\u0531-\u0587]+)ով\s+բուժել/gi, "$1 բուժում");
