@@ -53,9 +53,7 @@ export const FIELD_WEIGHTS: Record<QueryIntent, Record<string, number>> = {
   },
 };
 
-// ===============================
-// Synonyms — անփոփոխ
-// ===============================
+
 export const SYNONYMS: Record<string, string[]> = {
 
   // ========================================
@@ -309,9 +307,7 @@ export const SYNONYMS: Record<string, string[]> = {
   "ճարպակալում": ["գերքաշ", "լրացուցիչ քաշ"],
 };
 
-// ===============================
-// Intent detection keywords
-// ===============================
+
 export const INTENT_KEYWORDS = {
   USAGE: [
     "ինչպես", "օգտագործ", "խմել", "պատրաստ", "դեղամիջոց", "թուրմ",
@@ -325,9 +321,7 @@ export const INTENT_KEYWORDS = {
   HERB_NAME: [] as string[],
 };
 
-// ===============================
-// Armenian suffixes for stemming 
-// ===============================
+
 export const ARMENIAN_SUFFIXES = [
   // 12 տառ
   "ություններին", "ություններից", "ություններով",

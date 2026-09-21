@@ -431,7 +431,6 @@ export default function HerbSearch() {
                 </div>
               )}
 
-              {/* Գրագետ AI Պատասխանի հղումների ստացում՝ String.indexOf-ով (Առանց RegExp-ի) */}
               {ragResponse && (
                 <div style={S.ragBoxStyle}>
                   <h3 style={S.ragTitleStyle}>

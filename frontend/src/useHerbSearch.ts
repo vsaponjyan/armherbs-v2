@@ -75,13 +75,7 @@ export function useHerbSearch({
       }
 
       try {
-        // if (conversationMemory.isFollowUpQuery(trimmedQuery)) {
-        //   const resolved = conversationMemory.resolveFollowUp(trimmedQuery, herbsData);
-        //   if (resolved !== trimmedQuery) {
-        //     trimmedQuery = resolved;
-        //   }
-        // }
-        // ՆՈՐ.
+        
         const contextResult = await resolveContext(
           trimmedQuery,
           conversationMemory.getHistory()
@@ -90,7 +84,7 @@ export function useHerbSearch({
           trimmedQuery = contextResult.resolvedQuery;
           setRewriteInfo(`Համատեքստից՝ "${trimmedQuery}"`);
         }
-        //________________________________________________________________
+        
         const rewritten = queryRewriter.rewrite(
           trimmedQuery,
           herbsData.map((h) => h.name)
@@ -186,7 +180,7 @@ export function useHerbSearch({
           }
         }
 
-        //conversationMemory.addTurn(finalQuery, enrichedFound);
+        
         conversationMemory.addTurn(
           finalQuery,
           enrichedFound,

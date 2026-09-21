@@ -18,7 +18,6 @@ export async function resolveContext(
   const historyPayload = history.map((turn) => ({
     query: turn.query,
     herb_name: turn.herbName ?? null
-    //herb_name: turn.results[0]?.name ?? null,
   }));
 
   try {

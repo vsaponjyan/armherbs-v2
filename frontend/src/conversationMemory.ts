@@ -1,11 +1,10 @@
 import { SearchResult } from "./searchEngine";
 
-// added export for ConversationTurn
 export interface ConversationTurn {
   query: string;
   results: SearchResult[];
   timestamp: number;
-  herbName?: string;   // ← նոր. իրականում ճանաչված entity-ի անունը (եթե կար)
+  herbName?: string;   
 }
 
 const STORAGE_KEY       = "herb_conversation_history";
@@ -25,12 +24,6 @@ export class ConversationMemory {
     }, 0);
   }
 
-  // addTurn(query: string, results: SearchResult[]) {
-  //   this.cleanupExpiredTurns();
-  //   this.history.push({ query, results, timestamp: Date.now() });
-  //   if (this.history.length > this.maxHistory) this.history.shift();
-  //   this.saveToStorage();
-  // }
   addTurn(query: string, results: SearchResult[], herbName?: string) {
     this.cleanupExpiredTurns();
     this.history.push({ query, results, timestamp: Date.now(), herbName });
@@ -49,56 +42,6 @@ export class ConversationMemory {
     if (!lastTurn || lastTurn.results.length === 0) return null;
     return lastTurn.results[0];
   }
-
-//   isFollowUpQuery(query: string): boolean {
-//     if (this.history.length === 0) return false;
-//     const followUpPatterns = [
-//       /^(իսկ|ու|և)\s+/i,
-//       /^ինչպես\s+(պատրաստ|օգտագործ|կիրառ)/i,
-//       /^(այն|սա|դա)\s+/i,
-//       /^(պատրաստել|օգտագործել|կիրառել)/i,
-//       /^(ավելի|շատ|քիչ|լավ)\s+/i,
-//     ];
-//     return followUpPatterns.some((p) => p.test(query.trim()));
-//   }
-
-// resolveFollowUp(query: string, herbs: any[] = []): string {
-//   const lastHerb = this.getLastMentionedHerb();
-//   if (!lastHerb) return query;
-
-//   const isNewHerbMentioned = herbs.some(h => {
-//     const q = query.toLowerCase();
-//     const nameMatch = q.includes(h.name.toLowerCase());
-//     const idMatch   = q.includes(h.id.toString().toLowerCase());
-//     const altMatch  = h.alternativeNames?.some((alt: string) => 
-//       q.includes(alt.toLowerCase())
-//     );
-//     return nameMatch || idMatch || altMatch;
-//   });
-
-//   if (isNewHerbMentioned) {
-//     return query;
-//   }
-  
-  
-//   const USAGE_PATTERNS = [
-//     /ինչպես/i, /օգտագործ/i, /պատրաստ/i, /խմել/i, /կիրառ/i, /բուժ/i
-//   ];
-//   const hasUsageIntent = USAGE_PATTERNS.some(p => p.test(query));
-//   if (hasUsageIntent) return query;
-//   if (this.isFollowUpQuery(query)) {
-//     const cleanQuery = query
-//       .trim()
-//       .replace(/^(իսկ|ու|և|այն|սա|դա)\s+/i, "")
-//       .replace(/^(ավելի|շատ|քիչ|լավ)\s+/i, "")
-//       .replace(/^(պատրաստել|օգտագործել|կիրառել)\s*/i, "$1 ")
-//       .trim();
-
-    
-//     return cleanQuery ? `${lastHerb.name} ${cleanQuery}`.trim() : lastHerb.name;
-//   }
-//   return query;
-// }
 
  
   private autoCleanupIfNeeded(): void {
@@ -170,7 +113,7 @@ export class ConversationMemory {
     return this.history.map((t) => ({
       query:     t.query,
       timestamp: t.timestamp,
-      herbName:  t.herbName,   // ← նոր
+      herbName:  t.herbName,   
       results:   t.results.map((r) => ({
         id:               r.id,
         name:             r.name,

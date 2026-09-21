@@ -20,15 +20,6 @@ export class HerbEntityResolver {
   private symptomIndex = new Map<string, string>();
 
   
-  private readonly QUALIFIER_WORDS = new Set([
-    "վայրի", "անտառային", "լեռնային", "արևելյան", "արևմտյան",
-    "սև", "սպիտակ", "կարմիր", "դեղին", "կանաչ",
-    "մեծ", "փոքր", "երկար", "կարճ", "հասարակ", "իսկական",
-    "բժշկական", "հայկական", "պարսկական", "կովկասյան",
-    "ամառային", "ձմեռային", "գարնանային", "աշնանային",
-    "ջրային", "ճահճային", "դաշտային", "քարքարոտ",
-  ]);
-
   private stem(word: string): string {
     if (word.length <= 3) return word;
     let stemmed = word;
@@ -131,30 +122,6 @@ export class HerbEntityResolver {
       }
     }
 
-    //           removed
-    // if (matches.length === 0) {
-    //   const qWords = qLower.split(/\s+/).map(w => w.replace(/[^\p{L}]/gu, "")).filter(w => w.length >= 2);
-      
-    //   qWords.forEach((qWord, qIdx) => {
-    //     const normalized = this.normalizeWord(qWord);
-    //     if (this.QUALIFIER_WORDS.has(normalized)) return;
-
-    //     const qStem = this.stemWord(qWord);
-    //     if (qStem.length < 3) return;
-
-    //     for (const herb of this.herbs) {
-    //       const nameWords = herb.name.toLowerCase().split(/\s+/).map(w => this.stemWord(w));
-    //       const nameMatch = nameWords.some(nw => nw === qStem || (nw.length >= 4 && nw.startsWith(qStem)));
-    //       const idMatch = herb.id.toLowerCase() === qWord.toLowerCase();
-
-    //       if (nameMatch || idMatch) {
-    //         matches.push({ herb, index: qIdx, matchLength: qWord.length });
-    //       }
-    //     }
-    //   });
-    // }
-
-    
     if (matches.length > 0) {
       matches.sort((a, b) => b.matchLength - a.matchLength || b.index - a.index);
       const winner = matches[0].herb;
@@ -187,23 +154,7 @@ export class HerbEntityResolver {
     return { type: "herb", herbName: herb.name, herbId: herb.id, resolvedQuery };
   }
 
-  // private removeHerbFromQuery(query: string, herb: HerbInfo): string {
-  //   let cleaned = query.toLowerCase();
-  //   const namesToRemove = [
-  //     herb.name.toLowerCase(),
-  //     herb.id.toLowerCase(),
-  //     ...herb.alternativeNames.map((a) => a.toLowerCase()),
-  //   ];
-  //   for (const name of namesToRemove) {
-  //     cleaned = cleaned.replace(name, "");
-  //     const nameStem = this.stemWord(name);
-  //     if (nameStem.length >= 3) {
-  //       const regex = new RegExp(`${nameStem}[\\p{L}]*`, "giu");
-  //       cleaned = cleaned.replace(regex, "");
-  //     }
-  //   }
-  //   return cleaned.replace(/\s+/g, " ").trim();
-  // }
+  
   private removeHerbFromQuery(query: string, herb: HerbInfo): string {
     const namesToRemove = [herb.name, herb.id, ...herb.alternativeNames];
     const stemsToRemove = new Set<string>();
