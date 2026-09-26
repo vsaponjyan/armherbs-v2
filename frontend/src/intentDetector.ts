@@ -1,0 +1,64 @@
+import { Herb } from "./searchEngine";
+import { QueryIntent, INTENT_KEYWORDS, SYNONYMS} from "./searchConfig";
+import { stripArmenianSuffix } from "./utils/armenianStemmer";//new
+
+const stem = stripArmenianSuffix;
+
+export type { QueryIntent };
+
+const STEMMED_SYNONYM_KEYS: Set<string> = new Set(
+  Object.keys(SYNONYMS).map((key) => stem(key))
+);
+
+const STEMMED_USAGE_KEYWORDS: string[] = Array.from(new Set([
+  ...INTENT_KEYWORDS.USAGE,
+  "թեյ",
+  "կիրառ",
+  "օգտագործ",
+  "պատրաստ",
+  "խմ",
+  "բուժ",
+].map((kw) => stem(kw))));
+
+const STEMMED_SYMPTOM_KEYWORDS: string[] = INTENT_KEYWORDS.SYMPTOM.map((kw) =>
+  stem(kw)
+);
+
+export function detectIntent(query: string, herbs?: Herb[]): QueryIntent {
+  const q        = query.toLowerCase().trim();
+  const qWords   = q.split(/\s+/).map((w) => stem(w));
+  const qStemmed = qWords.join(" ");
+
+  
+  if (STEMMED_USAGE_KEYWORDS.some((kw) => qStemmed.includes(kw))) {
+    return "USAGE";
+  }
+
+ 
+  if (/տարբերություն|համեմատ|լավագույն|ավելի լավ|ո՞րը/.test(q)) {
+    return "COMPARISON";
+  }
+
+  
+  if (/ի՞նչ է|ի՞նչ ունի|նկարագր|մասին|ինչ բույս/.test(q)) {
+    return "HERB_INFO";
+  }
+
+  
+  if (herbs?.some((h) => q.includes(h.name.toLowerCase()))) {
+    return "HERB_NAME";
+  }
+
+  
+  const hasSymptomKeyword = STEMMED_SYMPTOM_KEYWORDS.some((kw) =>
+    qStemmed.includes(kw)
+  );
+  const hasSymptomSynonym = qWords.some((w) =>
+    STEMMED_SYNONYM_KEYS.has(w)
+  );
+  if (hasSymptomKeyword || hasSymptomSynonym) {
+    return "SYMPTOM";
+  }
+
+  return "GENERAL";
+}
