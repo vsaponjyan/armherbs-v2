@@ -5,11 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import ALLOWED_ORIGINS
 from app.api.routes import router, initialize_services
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     initialize_services()
     yield
     print("👋 Server փակվում է...")
+
 
 app = FastAPI(title="ArmHerbs API", lifespan=lifespan)
 
@@ -23,9 +25,11 @@ app.add_middleware(
 
 app.include_router(router, prefix="/api")
 
+
 @app.get("/")
 async def root():
     return {"message": "ArmHerbs Backend is running!"}
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
@@ -33,6 +37,7 @@ if __name__ == "__main__":
 # ✅ Ready to run:
 # ./venv/bin/uvicorn main:app --reload --host 0.0.0.0 --port 8000
 # source venv/bin/activate
-#python -m uvicorn main:app --reload
+# python -m uvicorn main:app --reload
 
-
+# latest state for running backend
+# source venv/bin/activate && python -m uvicorn main:app --reload

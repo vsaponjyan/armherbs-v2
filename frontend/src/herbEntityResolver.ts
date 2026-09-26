@@ -19,19 +19,6 @@ export class HerbEntityResolver {
   private herbs: HerbInfo[] = [];
   private symptomIndex = new Map<string, string>();
 
-  
-  // private stem(word: string): string {
-  //   if (word.length <= 3) return word;
-  //   let stemmed = word;
-  //   for (const suffix of ARMENIAN_SUFFIXES) {
-  //     if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
-  //       stemmed = stemmed.slice(0, -suffix.length);
-  //       break;
-  //     }
-  //   }
-  //   return stemmed;
-  // }
-  // ՆՈՐ.
 private stem(word: string): string {
   return stripArmenianSuffix(word);
 }

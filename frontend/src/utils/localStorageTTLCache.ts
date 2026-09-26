@@ -28,7 +28,7 @@ export function autoCleanupIfNeeded<T>(
       }
       localStorage.setItem(autoCleanupKey, String(now));
     } catch {
-      // silent — cleanup failure չպիտի խափանի app-ը
+      
     }
   }
   
