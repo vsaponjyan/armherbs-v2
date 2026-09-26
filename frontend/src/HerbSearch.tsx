@@ -574,7 +574,7 @@ import { herbEntityResolver } from "./herbEntityResolver";
 import { useHerbSearch } from "./useHerbSearch";
 import * as S from "./HerbSearchStyles";
 import Footer from "./Footer";
-import SmartSearchView from "./SmartSearchView";
+
 
 export interface HerbData {
   id: string;
@@ -829,23 +829,9 @@ export default function HerbSearch() {
           )}
 
           {view === "search" && (
-            <SmartSearchView
-              herbsData={herbsData}
-              query={query}
-              setQuery={setQuery}
-              results={results}
-              ragResponse={ragResponse}
-              suggestions={suggestions}
-              searchLoading={searchLoading}
-              error={error}
-              rewriteInfo={rewriteInfo}
-              handleSearch={handleSearch}
-              autocompleteSuggestions={autocompleteSuggestions}
-              setAutocompleteSuggestions={setAutocompleteSuggestions}
-              autocompleteIndex={autocompleteIndex}
-              setAutocompleteIndex={setAutocompleteIndex}
-              onSelectHerb={selectHerb}
-            />
+            <div>
+              {/* Search view content */}
+            </div>
           )}
 
           {view === "terms" && (

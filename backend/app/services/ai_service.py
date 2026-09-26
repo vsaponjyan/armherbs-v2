@@ -1,4 +1,4 @@
-import re
+#import re
 from fastapi import HTTPException
 from openai import OpenAI, RateLimitError, APIConnectionError, OpenAIError
 from app.config import OPENAI_API_KEY
