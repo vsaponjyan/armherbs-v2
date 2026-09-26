@@ -1,5 +1,14 @@
 import { SearchResult } from "./searchEngine";
-import { detectIntent } from "./intentDetector";
+import { detectIntent, QueryIntent } from "./intentDetector";
+
+const RAG_TRIGGER_THRESHOLDS: Record<QueryIntent, number> = {
+  HERB_INFO:  0.35,
+  SYMPTOM:    0.25,
+  USAGE:      0.28,
+  COMPARISON: 0.30,
+  GENERAL:    0.40,
+  HERB_NAME:  Infinity,  // դիտավորյալ՝ երբեք չtrigger անի (բույսի անվանման ուղիղ card-երը բավարար են)
+};
 
 export interface RAGResponse {
   answer: string;
@@ -23,14 +32,7 @@ export class RAGEngine {
     if (results.length === 0) return false;
     const topScore = results[0].finalScore ?? 0;
     const qType = detectIntent(query);
-
-    if (qType === "HERB_INFO"  && topScore >= 0.35) return true;
-    if (qType === "SYMPTOM"    && topScore >= 0.25) return true;
-    if (qType === "USAGE"      && topScore >= 0.28) return true;
-    if (qType === "COMPARISON" && topScore >= 0.30) return true;
-    if (qType === "GENERAL"    && topScore >= 0.40) return true;
-
-    return false;
+    return topScore >= RAG_TRIGGER_THRESHOLDS[qType];
   }
 
   async generateAnswer(

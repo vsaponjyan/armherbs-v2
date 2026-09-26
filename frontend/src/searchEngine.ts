@@ -1,25 +1,17 @@
-import {
-  FIELD_WEIGHTS,
-  SYNONYMS,
-  ARMENIAN_SUFFIXES,
-} from "./searchConfig";
-
+import { FIELD_WEIGHTS } from "./searchConfig";
 import { detectIntent, QueryIntent } from "./intentDetector";
+import { distance } from "fastest-levenshtein";
+import {
+  Herb,
+  normalize,
+  getNameMatchScore,
+  fieldLexicalScore,
+  cosineSimilarity,
+  hybridScore,
+} from "./searchScoring";
 
+export type { Herb };
 export type { QueryIntent };
-
-export interface Herb {
-  id: string;
-  name: string;
-  alternativeNames: string[];
-  healing: string;
-  symptoms: string[];
-  htmlFile: string;
-  embedding: number[];
-  usage?: string;
-  description?: string;
-  chemistry?: string;
-}
 
 export interface SearchResult extends Herb {
   semanticScore?: number;
@@ -45,160 +37,6 @@ export class HerbSearchEngine {
   private readonly CACHE_EXPIRY = 5 * 60 * 1000;
   private readonly CACHE_MAX_SIZE = 100;
 
-  private readonly QUALIFIER_WORDS = new Set([
-    "վայրի", "անտառային", "լեռնային", "արևելյան", "արևմտյան",
-    "սև", "սպիտակ", "կարմիր", "դեղին", "կանաչ",
-    "մեծ", "փոքր", "երկար", "կարճ", "հասարակ", "իսկական",
-    "բժշկական", "հայկական", "պարսկական", "կովկասյան",
-    "ամառային", "ձմեռային", "գարնանային", "աշնանային",
-    "ջրային", "ճահճային", "դաշտային", "քարքարոտ"
-  ]);
-
-  private readonly STEMMED_SYNONYMS: Map<string, string[]>;
-  private readonly REVERSE_STEMMED_SYNONYMS: Map<string, string[]>;
-
-  private readonly NORMALIZATION_MAP: Readonly<Record<string, string>> = Object.freeze({
-    // ԳԼԽԱՑԱՎ ԵՎ ՆԵՅՐՈԼՈԳԻԱ
-    "գլխի": "գլուխ",
-
-    // ՍՏԱՄՈՔՍ ԵՎ ՄԱՐՍՈՂՈՒԹՅՈՒՆ
-    "մարսողության": "մարսողություն",
-    "մարսողությունից": "մարսողություն",
-    "մարսողությամբ": "մարսողություն",
-    "թթվայնության": "թթվայնություն",
-    "թթվայնությունից": "թթվայնություն",
-    "դիսպեպսիայի": "դիսպեպսիա",
-
-    // ՍԻՐՏ ԵՎ ՇՐՋԱՆԱՌՈՒԹՅՈՒՆ
-    "սրտի": "սիրտ",
-    "սրտով": "սիրտ",
-    "սրտում": "սիրտ",
-    "սրտից": "սիրտ",
-    "սրտային": "սիրտ",
-    "արյունաճնշման": "արյունաճնշում",
-    "հիպերտոնիայի": "հիպերտոնիա",
-    "հիպերտոնիայից": "հիպերտոնիա",
-    "անեմիայի": "անեմիա",
-    "անեմիայից": "անեմիա",
-    "արյան": "արյուն",
-    "արյունային": "արյուն",
-
-    // ՀԱԶ, ՇՆՉԱՌՈՒԹՅՈՒՆ ԵՎ ԹՈՔԵՐ
-    "ասթմայի": "ասթմա",
-    "ասթմայից": "ասթմա",
-    "շնչառության": "շնչառություն",
-
-    // ՄՐՍԱԾՈՒԹՅՈՒՆ ԵՎ ՎԱՐԱԿՆԵՐ
-    "մրսածության": "մրսածություն",
-    "մրսածությունից": "մրսածություն",
-    "ջերմության": "ջերմություն",
-    "ջերմությունից": "ջերմություն",
-    "ինֆեկցիայի": "ինֆեկցիա",
-    "բորբոքման": "բորբոքում",
-    "բորբոքմամբ": "բորբոքում",
-
-    // ՆՅԱՐԴԱՅԻՆ ՀԱՄԱԿԱՐԳ
-    "նյարդերի": "նյարդ",
-    "նյարդային": "նյարդ",
-    "նյարդերից": "նյարդ",
-    "անքնության": "անքնություն",
-    "անքնությունից": "անքնություն",
-    "դեպրեսիայի": "դեպրեսիա",
-    "դեպրեսիայից": "դեպրեսիա",
-    "անհանգստության": "անհանգստություն",
-    "լարվածության": "լարվածություն",
-    "լարվածությունից": "լարվածություն",
-
-    // ՓՈՐ ԵՎ ԱՂԻՆԵՐ
-    "փորկապության": "փորկապություն",
-    "փորկապությունից": "փորկապություն",
-    "դիարեայի": "դիարեա",
-    "դիարեայից": "դիարեա",
-
-    // ԼՅԱՐԴ ԵՎ ԼԵՂԱՊԱՐԿ
-    "լյարդային": "լյարդ",
-
-    // ԵՐԻԿԱՄՆԵՐ ԵՎ ՄԻԶՈՒՂԻՆԵՐ
-    "երիկամային": "երիկամ",
-    "միզուղիների": "միզուղիներ",
-
-    // ՌԵՎՄԱՏԻԶՄ, ՀՈԴԵՐ ԵՎ ՈՍԿՈՐՆԵՐ
-    "հոդերի": "հոդ",
-    "հոդերից": "հոդ",
-
-    // ՄԱՇԿ
-    "մաշկային": "մաշկ",
-    "էկզեմայի": "էկզեմա",
-    "էկզեմայից": "էկզեմա",
-
-    // ԿԱՆԱՑԻ ՀԱՄԱԿԱՐԳ
-    "հղիության": "հղիություն",
-    "հղիությունից": "հղիություն",
-
-    // ԱՐՅՈՒՆ ԵՎ ԱՆՈԹՆԵՐ
-    "արյունահոսության": "արյունահոսություն",
-
-    // ԿՈԿՈՐԴ ԵՎ ՔԻԹ
-    "քթի": "քիթ",
-    "քթից": "քիթ",
-
-    // ԱՅԼ ԸՆԴՀԱՆՈՒՐ
-    "հոգնածության": "հոգնածություն",
-    "հոգնածությունից": "հոգնածություն",
-    "թուլության": "թուլություն",
-    "թուլությունից": "թուլություն",
-    "թունավորման": "թունավորում",
-
-    // ԲԱՅԱԿԱՆ ՁԵՎԵՐ
-    "բուժել": "բուժ",
-    "բուժելու": "բուժ",
-    "բուժման": "բուժ",
-    "բուժիչ": "բուժ",
-    "բուժվել": "բուժ",
-    "բուժվում": "բուժ",
-    "օգտագործել": "օգտագործ",
-    "օգտագործելու": "օգտագործ",
-    "օգտագործման": "օգտագործ",
-    "կիրառել": "կիրառ",
-    "կիրառելու": "կիրառ",
-    "կիրառման": "կիրառ",
-    "պատրաստել": "պատրաստ",
-    "պատրաստելու": "պատրաստ",
-    "պատրաստման": "պատրաստ",
-    "խմել": "խմ",
-    "խմելու": "խմ"
-  });
-
-  constructor() {
-    this.STEMMED_SYNONYMS = new Map();
-    this.REVERSE_STEMMED_SYNONYMS = new Map();
-
-    for (const [key, synonyms] of Object.entries(SYNONYMS)) {
-      const stemmedKey = this.stem(key);
-      const stemmedSyns = synonyms.flatMap((s) =>
-        this.normalize(s, true).split(/\s+/).filter((w) => w.length > 1)
-      );
-
-      const existing = this.STEMMED_SYNONYMS.get(stemmedKey);
-      this.STEMMED_SYNONYMS.set(stemmedKey, existing 
-        ? [...new Set([...existing, ...stemmedSyns])] 
-        : stemmedSyns
-      );
-
-      
-      for (const syn of stemmedSyns) {
-        if (syn !== stemmedKey) {
-          const revExisting = this.REVERSE_STEMMED_SYNONYMS.get(syn);
-          this.REVERSE_STEMMED_SYNONYMS.set(syn, revExisting 
-            ? [...new Set([...revExisting, stemmedKey])] 
-            : [stemmedKey]
-          );
-        }
-      }
-    }
-    console.log(`✅ SearchEngine: ${this.STEMMED_SYNONYMS.size} stemmed keys pre-computed.`);
-  }
-
   async loadEmbeddings(): Promise<void> {
     if (this.loaded) return;
     const res = await fetch("/herbs_embeddings.json");
@@ -208,33 +46,8 @@ export class HerbSearchEngine {
     console.log(`✅ Բեռնված է ${this.herbs!.length} դեղաբույս`);
   }
 
-  private stem(word: string): string {
-    const lowerWord = word.toLowerCase();
-    if (this.NORMALIZATION_MAP[lowerWord]) return this.NORMALIZATION_MAP[lowerWord];
-    if (word.length <= 3) return word;
-
-    let stemmed = lowerWord;
-    for (const suffix of ARMENIAN_SUFFIXES) {
-      if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
-        stemmed = stemmed.slice(0, -suffix.length);
-        break;
-      }
-    }
-    return stemmed;
-  }
-
-  private normalize(text: string, applyStemming = true): string {
-    const cleaned = text
-      .toLowerCase()
-      .replace(/[^\p{L}\s]/gu, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (!applyStemming) return cleaned;
-    return cleaned.split(/\s+/).map((w) => this.stem(w)).join(" ");
-  }
-
   private getCacheKey(queryText: string, topK: number): string {
-    return `${this.normalize(queryText)}-${topK}`;
+    return `${normalize(queryText)}-${topK}`;
   }
 
   private getFromCache(key: string): SearchResult[] | null {
@@ -248,8 +61,6 @@ export class HerbSearchEngine {
 
   private saveToCache(key: string, results: SearchResult[]): void {
     this.cache.set(key, { results, timestamp: Date.now() });
-    
-    // Map insertion order-ի շնորհիվ առաջին տարրը միշտ ամենահինն է
     if (this.cache.size > this.CACHE_MAX_SIZE) {
       const oldestKey = this.cache.keys().next().value;
       if (oldestKey !== undefined) this.cache.delete(oldestKey);
@@ -258,170 +69,6 @@ export class HerbSearchEngine {
 
   private detectIntent(query: string): QueryIntent {
     return detectIntent(query, this.herbs ?? undefined);
-  }
-
-  private expandQuery(query: string): { original: string[]; expanded: string[] } {
-    const qNorm = this.normalize(query);
-    const originalWords = qNorm.split(/\s+/).filter((w) => w.length > 1);
-    const expandedSet = new Set<string>();
-
-    for (const word of originalWords) {
-      const directSyns = this.STEMMED_SYNONYMS.get(word);
-      if (directSyns) directSyns.forEach((s) => expandedSet.add(s));
-
-      const reverseKeys = this.REVERSE_STEMMED_SYNONYMS.get(word);
-      if (reverseKeys) reverseKeys.forEach((k) => expandedSet.add(k));
-    }
-
-    originalWords.forEach((w) => expandedSet.delete(w));
-    return { original: originalWords, expanded: Array.from(expandedSet) };
-  }
-
-  private levenshteinDistance(str1: string, str2: string): number {
-    const m = str1.length, n = str2.length;
-    if (Math.abs(m - n) > 4) return 999;
-    
-    const matrix = Array.from({ length: m + 1 }, (_, i) =>
-      Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
-    );
-
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        );
-      }
-    }
-    return matrix[m][n];
-  }
-
-  private getNameMatchScore(
-    query: string,
-    herb: Herb
-  ): { score: number; type: "exact" | "fuzzy" | null } {
-    const qNorm = this.normalize(query, false);
-    const qStem = this.normalize(query, true);
-    const allNames = [herb.name, ...herb.alternativeNames];
-    const allNamesNorm = allNames.map((n) => this.normalize(n, false));
-    const allNamesStem = allNames.map((n) => this.normalize(n, true));
-
-    if (allNamesStem.some((n) => n === qStem) || allNamesNorm.some((n) => n === qNorm)) {
-      return { score: 1.0, type: "exact" };
-    }
-
-    if (allNamesStem.some((n) => n.length >= 2 && qStem.includes(n))) {
-      return { score: 0.98, type: "exact" };
-    }
-
-    if (allNamesNorm.some((n) => n.length >= 2 && qNorm.includes(n))) {
-      return { score: 0.97, type: "exact" };
-    }
-
-    const qWordsStem = qStem.split(/\s+/).filter((w) => w.length >= 4);
-    const qWordsNorm = qNorm.split(/\s+/).filter((w) => w.length >= 4);
-    const mainNameStem = this.normalize(herb.name, true);
-    const mainNameNorm = this.normalize(herb.name, false);
-
-    for (const qWord of qWordsStem) {
-      if (mainNameStem.includes(qWord)) return { score: 0.95, type: "fuzzy" };
-    }
-    for (const qWord of qWordsNorm) {
-      if (mainNameNorm.includes(qWord)) return { score: 0.93, type: "fuzzy" };
-    }
-
-    for (const altName of herb.alternativeNames) {
-      const altNorm = this.normalize(altName, false);
-      const altStem = this.normalize(altName, true);
-      const altWords = altStem.split(/\s+/).filter((w) => w.length >= 3);
-
-      if (altWords.length === 1) {
-        if (this.QUALIFIER_WORDS.has(altWords[0])) continue;
-
-        for (const qWord of qWordsStem) {
-          if (altStem.includes(qWord) || qWord.includes(altStem)) return { score: 0.90, type: "fuzzy" };
-        }
-        for (const qWord of qWordsNorm) {
-          if (altNorm.includes(qWord) || qWord.includes(altNorm)) return { score: 0.88, type: "fuzzy" };
-        }
-      } else {
-        const significantAltWords = altWords.filter((w) => !this.QUALIFIER_WORDS.has(w));
-        if (significantAltWords.length === 0) continue;
-
-        const matchCount = significantAltWords.filter((aw) =>
-          qWordsStem.some((qw) => qw.includes(aw) || aw.includes(qw))
-        ).length;
-
-        if (matchCount / significantAltWords.length >= 0.75) {
-          const qualifierWords = altWords.filter((w) => this.QUALIFIER_WORDS.has(w));
-          const qualifierMatch = qualifierWords.length === 0 || qualifierWords.some((qw) => qNorm.includes(qw));
-          return { score: qualifierMatch ? 0.90 : 0.70, type: "fuzzy" };
-        }
-      }
-    }
-
-    for (const herbName of allNamesNorm) {
-      for (const nameWord of herbName.split(/\s+/).filter((w) => w.length >= 4)) {
-        if (this.QUALIFIER_WORDS.has(nameWord)) continue;
-        if (qNorm.includes(nameWord)) return { score: 0.88, type: "fuzzy" };
-      }
-    }
-
-    return { score: 0, type: null };
-  }
-
-  private fieldLexicalScore(query: string, fieldText: string): number {
-    const { original, expanded } = this.expandQuery(query);
-    const fieldNorm = this.normalize(fieldText, true);
-    let score = 0, maxScore = 0;
-
-    for (const word of original) {
-      maxScore += 1.0;
-      if (fieldNorm.includes(word)) score += 1.0;
-    }
-    for (const word of expanded) {
-      maxScore += 0.6;
-      if (fieldNorm.includes(word)) score += 0.6;
-    }
-    return maxScore > 0 ? score / maxScore : 0;
-  }
-
-  private cosineSimilarity(a: number[], b: number[]): number {
-    let dot = 0, normA = 0, normB = 0;
-    for (let i = 0; i < a.length; i++) {
-      dot += a[i] * b[i];
-      normA += a[i] * a[i];
-      normB += b[i] * b[i];
-    }
-    const denom = Math.sqrt(normA) * Math.sqrt(normB);
-    return denom === 0 ? 0 : dot / denom;
-  }
-
-  private hybridScore(
-    semanticNorm: number,
-    lexical: number,
-    nameMatchScore: number,
-    intent: QueryIntent
-  ): number {
-    const weights: Record<QueryIntent, { s: number; l: number }> = {
-      HERB_NAME:  { s: 0.10, l: 0.90 },
-      SYMPTOM:    { s: 0.65, l: 0.35 },
-      USAGE:      { s: 0.55, l: 0.45 },
-      GENERAL:    { s: 0.55, l: 0.45 },
-      COMPARISON: { s: 0.50, l: 0.50 },
-      HERB_INFO:  { s: 0.45, l: 0.55 },
-    };
-    const w = weights[intent] ?? weights.GENERAL;
-    let score = w.s * semanticNorm + w.l * lexical;
-
-    if (nameMatchScore > 0) {
-      score = Math.min(1.0, score + nameMatchScore * 0.25);
-    }
-
-    if (intent === "HERB_NAME" && lexical < 0.1) score *= 0.5;
-    return score;
   }
 
   async search(
@@ -436,7 +83,7 @@ export class HerbSearchEngine {
     if (cached) return cached;
 
     const intent = this.detectIntent(queryText);
-    const semanticScores = this.herbs!.map((h) => this.cosineSimilarity(queryEmbedding, h.embedding));
+    const semanticScores = this.herbs!.map((h) => cosineSimilarity(queryEmbedding, h.embedding));
 
     const minAcceptable = 0.12;
     const maxExpected = 0.45;
@@ -455,17 +102,17 @@ export class HerbSearchEngine {
         let normS = (rawS - minAcceptable) / (maxExpected - minAcceptable);
         normS = Math.max(0, Math.min(1, normS));
 
-        const nameMatch = this.getNameMatchScore(queryText, herb);
+        const nameMatch = getNameMatchScore(queryText, herb);
         const hasNameMatch = nameMatch.score > 0;
 
         if (!hasNameMatch && rawS < ABSOLUTE_THRESHOLD[intent]) return null;
 
         const weights = FIELD_WEIGHTS[intent] ?? FIELD_WEIGHTS.GENERAL;
-        const nameS  = this.fieldLexicalScore(queryText, herb.name);
-        const altS   = herb.alternativeNames.length > 0 ? this.fieldLexicalScore(queryText, herb.alternativeNames.join(" ")) : 0;
-        const sympS  = herb.symptoms.length > 0 ? this.fieldLexicalScore(queryText, herb.symptoms.join(" ")) : 0;
-        const healS  = this.fieldLexicalScore(queryText, herb.healing);
-        const usageS = herb.usage ? this.fieldLexicalScore(queryText, herb.usage) : 0;
+        const nameS  = fieldLexicalScore(queryText, herb.name);
+        const altS   = herb.alternativeNames.length > 0 ? fieldLexicalScore(queryText, herb.alternativeNames.join(" ")) : 0;
+        const sympS  = herb.symptoms.length > 0 ? fieldLexicalScore(queryText, herb.symptoms.join(" ")) : 0;
+        const healS  = fieldLexicalScore(queryText, herb.healing);
+        const usageS = herb.usage ? fieldLexicalScore(queryText, herb.usage) : 0;
 
         const lexical =
           nameS  * (weights.name             ?? 0) +
@@ -474,7 +121,7 @@ export class HerbSearchEngine {
           healS  * (weights.healing          ?? 0) +
           usageS * (weights.usage            ?? 0.1);
 
-        const finalScore = this.hybridScore(normS, lexical, nameMatch.score, intent);
+        const finalScore = hybridScore(normS, lexical, nameMatch.score, intent);
         const finalThreshold = hasNameMatch ? 0.08 : 0.14;
         if (finalScore < finalThreshold) return null;
 
@@ -517,7 +164,7 @@ export class HerbSearchEngine {
 
   async findSuggestions(query: string, maxSuggestions = 3): Promise<string[]> {
     if (!this.herbs) return [];
-    const qNorm = this.normalize(query, false);
+    const qNorm = normalize(query, false);
     if (qNorm.length < 2) return [];
 
     const candidates: { name: string; distance: number }[] = [];
@@ -527,14 +174,14 @@ export class HerbSearchEngine {
       if (qNorm.length >= 4 && qNorm.length <= 6) maxAllowed = 1;
       if (qNorm.length > 6) maxAllowed = 2;
 
-      const d = this.levenshteinDistance(qNorm, this.normalize(herb.name, false));
+      const d = distance(qNorm, normalize(herb.name, false));
       if (d <= maxAllowed) {
         candidates.push({ name: herb.name, distance: d });
         continue;
       }
 
       for (const alt of herb.alternativeNames) {
-        const dAlt = this.levenshteinDistance(qNorm, this.normalize(alt, false));
+        const dAlt = distance(qNorm, normalize(alt, false));
         if (dAlt <= maxAllowed) {
           candidates.push({ name: herb.name, distance: dAlt });
           break;

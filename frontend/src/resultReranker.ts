@@ -1,4 +1,10 @@
+
 import { SearchResult } from "./searchEngine";
+import {
+  autoCleanupIfNeeded,
+  loadFreshFromStorage,
+  saveWithQuotaHandling,
+} from "./utils/localStorageTTLCache";
 
 interface ClickData {
   query: string;
@@ -7,23 +13,40 @@ interface ClickData {
   lastClicked: number;
 }
 
-const RERANKER_STORAGE_KEY  = "herb_click_data";
-const AUTO_CLEANUP_KEY       = "herb_reranker_last_cleanup";
-const CLEANUP_INTERVAL       = 24 * 60 * 60 * 1000; 
-const MAX_STORAGE_ENTRIES    = 200; 
+type ClickEntry = [string, ClickData];
+
+const RERANKER_STORAGE_KEY = "herb_click_data";
+const AUTO_CLEANUP_KEY     = "herb_reranker_last_cleanup";
+const CLEANUP_INTERVAL     = 24 * 60 * 60 * 1000;
+const MAX_STORAGE_ENTRIES  = 200;
 
 export class ResultReranker {
   private clickData: Map<string, ClickData>;
-  private maxAge          = 7 * 24 * 60 * 60 * 1000; 
+  private maxAge          = 7 * 24 * 60 * 60 * 1000;
   private lastCleanup     = 0;
-  private cleanupInterval = 5 * 60 * 1000; 
-
+  private cleanupInterval = 5 * 60 * 1000;
 
   constructor() {
     this.clickData = new Map();
     setTimeout(() => {
-      this.autoCleanupIfNeeded();
-      this.loadFromStorage();
+      autoCleanupIfNeeded<ClickEntry>(
+        RERANKER_STORAGE_KEY,
+        AUTO_CLEANUP_KEY,
+        CLEANUP_INTERVAL,
+        this.maxAge,
+        ([, data]) => data.lastClicked,
+        "ResultReranker"
+      );
+
+      const freshEntries = loadFreshFromStorage<ClickEntry>(
+        RERANKER_STORAGE_KEY,
+        this.maxAge,
+        ([, data]) => data.lastClicked
+      );
+      for (const [key, data] of freshEntries) {
+        this.clickData.set(key, data);
+      }
+      console.log(`✅ ResultReranker: ${this.clickData.size} click records loaded`);
     }, 0);
   }
 
@@ -54,8 +77,7 @@ export class ResultReranker {
 
     const clickBoost = Math.min(0.15, data.clicks * 0.03);
 
-    const daysSinceLastClick =
-      (Date.now() - data.lastClicked) / (1000 * 60 * 60 * 24);
+    const daysSinceLastClick = (Date.now() - data.lastClicked) / (1000 * 60 * 60 * 24);
     const recencyMultiplier =
       daysSinceLastClick < 1 ? 1.0  :
       daysSinceLastClick < 3 ? 0.75 :
@@ -76,104 +98,30 @@ export class ResultReranker {
       .sort((a, b) => (b.finalScore ?? 0) - (a.finalScore ?? 0));
   }
 
-
-  private autoCleanupIfNeeded(): void {
-    try {
-      const lastCleanup = parseInt(
-        localStorage.getItem(AUTO_CLEANUP_KEY) ?? "0"
-      );
-      const now = Date.now();
-      if (now - lastCleanup < CLEANUP_INTERVAL) return;
-
-      const raw = localStorage.getItem(RERANKER_STORAGE_KEY);
-      if (raw) {
-        const entries = JSON.parse(raw) as [string, ClickData][];
-        const fresh   = entries.filter(
-          ([, data]) => now - data.lastClicked <= this.maxAge
-        );
-        if (fresh.length < entries.length) {
-          localStorage.setItem(
-            RERANKER_STORAGE_KEY,
-            JSON.stringify(fresh)
-          );
-          console.log(
-            `🧹 ResultReranker: auto-cleanup — հեռացվել է ${entries.length - fresh.length} հին entry`
-          );
-        }
-      }
-      localStorage.setItem(AUTO_CLEANUP_KEY, String(now));
-    } catch {
-      
-    }
-  }
-
-  private loadFromStorage(): void {
-    try {
-      const raw = localStorage.getItem(RERANKER_STORAGE_KEY);
-      if (!raw) return;
-      const entries = JSON.parse(raw) as [string, ClickData][];
-      const now     = Date.now();
-      for (const [key, data] of entries) {
-        if (now - data.lastClicked <= this.maxAge) {
-          this.clickData.set(key, data);
-        }
-      }
-      console.log(`✅ ResultReranker: ${this.clickData.size} click records loaded`);
-    } catch {
-      localStorage.removeItem(RERANKER_STORAGE_KEY);
-    }
-  }
-
-  
   private saveToStorage(): void {
-    try {
-      
-      let entries = Array.from(this.clickData.entries());
-      if (entries.length > MAX_STORAGE_ENTRIES) {
-        
-        entries.sort(([, a], [, b]) => b.lastClicked - a.lastClicked);
-        
-        entries = entries.slice(0, MAX_STORAGE_ENTRIES);
-        
-        this.clickData.clear();
-        for (const [key, data] of entries) {
-          this.clickData.set(key, data);
-        }
-        console.warn(
-          `⚠️ ResultReranker: LRU eviction — թողնվել է ${MAX_STORAGE_ENTRIES} entry`
-        );
-      }
-      localStorage.setItem(RERANKER_STORAGE_KEY, JSON.stringify(entries));
-    } catch (e) {
-      if (
-        e instanceof DOMException &&
-        (e.name === "QuotaExceededError" ||
-          e.name === "NS_ERROR_DOM_QUOTA_REACHED")
-      ) {
-        
-        const entries = Array.from(this.clickData.entries()).sort(
-          ([, a], [, b]) => b.lastClicked - a.lastClicked
-        );
-        const half = Math.floor(entries.length / 2);
-        const kept = entries.slice(0, half);
-        this.clickData.clear();
-        for (const [key, data] of kept) {
-          this.clickData.set(key, data);
-        }
-        console.warn(
-          `⚠️ localStorage լցված — click data-ի հին կեսը հեռացվեց`
-        );
-        
-        try {
-          localStorage.setItem(
-            RERANKER_STORAGE_KEY,
-            JSON.stringify(kept)
-          );
-        } catch {
-          localStorage.removeItem(RERANKER_STORAGE_KEY);
-        }
-      }
+    let entries: ClickEntry[] = Array.from(this.clickData.entries());
+
+    // Proactive LRU cap, նախքան save-ը (ոչ quota-exceeded-ի reaction, այլ կանխարգելիչ)
+    if (entries.length > MAX_STORAGE_ENTRIES) {
+      entries.sort(([, a], [, b]) => b.lastClicked - a.lastClicked);
+      entries = entries.slice(0, MAX_STORAGE_ENTRIES);
+      this.clickData.clear();
+      for (const [key, data] of entries) this.clickData.set(key, data);
+      console.warn(`⚠️ ResultReranker: LRU eviction — թողնվել է ${MAX_STORAGE_ENTRIES} entry`);
     }
+
+    saveWithQuotaHandling<ClickEntry>(
+      RERANKER_STORAGE_KEY,
+      entries,
+      (current) => {
+        const sorted = [...current].sort(([, a], [, b]) => b.lastClicked - a.lastClicked);
+        const half   = sorted.slice(0, Math.floor(sorted.length / 2));
+        this.clickData.clear();
+        for (const [key, data] of half) this.clickData.set(key, data);
+        return half;
+      },
+      "ResultReranker"
+    );
   }
 
   private throttledCleanup() {
@@ -191,12 +139,6 @@ export class ResultReranker {
     });
     toDelete.forEach((key) => this.clickData.delete(key));
     if (toDelete.length > 0) this.saveToStorage();
-  }
-
-  clearData() {
-    this.clickData.clear();
-    localStorage.removeItem(RERANKER_STORAGE_KEY);
-    localStorage.removeItem(AUTO_CLEANUP_KEY);
   }
 }
 

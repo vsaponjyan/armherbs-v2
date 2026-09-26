@@ -1,26 +1,41 @@
 import { SearchResult } from "./searchEngine";
+import {
+  autoCleanupIfNeeded,
+  loadFreshFromStorage,
+  saveWithQuotaHandling,
+} from "./utils/localStorageTTLCache";
 
 export interface ConversationTurn {
   query: string;
   results: SearchResult[];
   timestamp: number;
-  herbName?: string;   
+  herbName?: string;
 }
 
-const STORAGE_KEY       = "herb_conversation_history";
-const AUTO_CLEANUP_KEY  = "herb_conv_last_cleanup";
-const CLEANUP_INTERVAL  = 24 * 60 * 60 * 1000;
+const STORAGE_KEY      = "herb_conversation_history";
+const AUTO_CLEANUP_KEY = "herb_conv_last_cleanup";
+const CLEANUP_INTERVAL = 24 * 60 * 60 * 1000;
 
 export class ConversationMemory {
   private history: ConversationTurn[] = [];
   private maxHistory     = 5;
   private sessionTimeout = 30 * 60 * 1000;
 
-  
   constructor() {
     setTimeout(() => {
-      this.autoCleanupIfNeeded();
-      this.loadFromStorage();
+      autoCleanupIfNeeded<ConversationTurn>(
+        STORAGE_KEY,
+        AUTO_CLEANUP_KEY,
+        CLEANUP_INTERVAL,
+        this.sessionTimeout,
+        (t) => t.timestamp,
+        "ConversationMemory"
+      );
+      this.history = loadFreshFromStorage<ConversationTurn>(
+        STORAGE_KEY,
+        this.sessionTimeout,
+        (t) => t.timestamp
+      );
     }, 0);
   }
 
@@ -43,77 +58,27 @@ export class ConversationMemory {
     return lastTurn.results[0];
   }
 
- 
-  private autoCleanupIfNeeded(): void {
-    try {
-      const lastCleanup = parseInt(
-        localStorage.getItem(AUTO_CLEANUP_KEY) ?? "0"
-      );
-      const now = Date.now();
-      if (now - lastCleanup < CLEANUP_INTERVAL) return;
-
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as ConversationTurn[];
-        const fresh  = parsed.filter(
-          (t) => now - t.timestamp < this.sessionTimeout
-        );
-        if (fresh.length < parsed.length) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
-          console.log(
-            `🧹 ConversationMemory: auto-cleanup — հեռացվել է ${parsed.length - fresh.length} հին turn`
-          );
-        }
-      }
-      localStorage.setItem(AUTO_CLEANUP_KEY, String(now));
-    } catch {
-      
-    }
-  }
-
-  private loadFromStorage(): void {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as ConversationTurn[];
-      const now    = Date.now();
-      this.history = parsed.filter(
-        (t) => now - t.timestamp < this.sessionTimeout
-      );
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }
-
   private saveToStorage(): void {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(this.getLightweightHistory())
-      );
-    } catch (e) {
-      if (
-        e instanceof DOMException &&
-        (e.name === "QuotaExceededError" ||
-          e.name === "NS_ERROR_DOM_QUOTA_REACHED")
-      ) {
+    saveWithQuotaHandling<ReturnType<typeof this.getLightweightHistory>[number]>(
+      STORAGE_KEY,
+      this.getLightweightHistory(),
+      () => {
         if (this.history.length > 1) {
           this.history.shift();
-          console.warn("⚠️ localStorage լցված — ամենահին turn-ը հեռացվեց");
-          this.saveToStorage();
         } else {
-          localStorage.removeItem(STORAGE_KEY);
-          console.warn("⚠️ localStorage լցված — history-ն մաքրվեց");
+          this.history = [];
         }
-      }
-    }
+        return this.getLightweightHistory();
+      },
+      "ConversationMemory"
+    );
   }
 
   private getLightweightHistory() {
     return this.history.map((t) => ({
       query:     t.query,
       timestamp: t.timestamp,
-      herbName:  t.herbName,   
+      herbName:  t.herbName,
       results:   t.results.map((r) => ({
         id:               r.id,
         name:             r.name,
@@ -134,12 +99,6 @@ export class ConversationMemory {
     this.history = this.history.filter(
       (turn) => now - turn.timestamp < this.sessionTimeout
     );
-  }
-
-  clear() {
-    this.history = [];
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(AUTO_CLEANUP_KEY);
   }
 
   getHistory(): ConversationTurn[] {
