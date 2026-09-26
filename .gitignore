@@ -8,3 +8,6 @@ venv/
 .env.production
 
 __pycache__
+
+.claude
+.history

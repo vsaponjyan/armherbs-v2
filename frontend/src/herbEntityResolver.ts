@@ -1,4 +1,4 @@
-import { ARMENIAN_SUFFIXES } from "./searchConfig";
+import { stripArmenianSuffix } from "./utils/armenianStemmer";
 
 interface HerbInfo {
   id: string;
@@ -20,17 +20,21 @@ export class HerbEntityResolver {
   private symptomIndex = new Map<string, string>();
 
   
-  private stem(word: string): string {
-    if (word.length <= 3) return word;
-    let stemmed = word;
-    for (const suffix of ARMENIAN_SUFFIXES) {
-      if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
-        stemmed = stemmed.slice(0, -suffix.length);
-        break;
-      }
-    }
-    return stemmed;
-  }
+  // private stem(word: string): string {
+  //   if (word.length <= 3) return word;
+  //   let stemmed = word;
+  //   for (const suffix of ARMENIAN_SUFFIXES) {
+  //     if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
+  //       stemmed = stemmed.slice(0, -suffix.length);
+  //       break;
+  //     }
+  //   }
+  //   return stemmed;
+  // }
+  // ՆՈՐ.
+private stem(word: string): string {
+  return stripArmenianSuffix(word);
+}
 
   private normalizeWord(word: string): string {
     return word.toLowerCase().replace(/[^\p{L}]/gu, "").trim();

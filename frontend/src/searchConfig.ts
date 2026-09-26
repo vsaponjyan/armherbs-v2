@@ -322,7 +322,7 @@ export const INTENT_KEYWORDS = {
 };
 
 
-export const ARMENIAN_SUFFIXES = [
+export const ARMENIAN_CASES = [
   // 12 տառ
   "ություններին", "ություններից", "ություններով",
   // 11 տառ
