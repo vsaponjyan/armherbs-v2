@@ -36,3 +36,4 @@ if __name__ == "__main__":
 #python -m uvicorn main:app --reload
 
 
+# source venv/bin/activate && python -m uvicorn main:app --reload
