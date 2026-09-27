@@ -7,20 +7,8 @@ import { queryRewriter } from "./queryRewriter";
 import { herbEntityResolver } from "./herbEntityResolver";
 import { embedText } from "./queryEmbedding";
 import { resultReranker } from "./resultReranker";
+import { HerbData } from "./HerbSearch";
 
-interface HerbData {
-  id: string;
-  name: string;
-  alternativeNames: string[];
-  description: string;
-  chemistry: string;
-  healing: string;
-  usage: string;
-  otherBenefits: string;
-  symptoms: string[];
-  htmlFile: string;
-  img: string;
-}
 
 interface UseHerbSearchProps {
   query: string;

@@ -1,4 +1,3 @@
-import re
 from fastapi import HTTPException
 from openai import AsyncOpenAI, RateLimitError, APIConnectionError, OpenAIError
 from app.config import OPENAI_API_KEY

@@ -24,7 +24,7 @@ class RAGRequest(BaseModel):
     query: str
     context: list[dict]
     primary_herb: str | None = None
-#_____________________________________
+
 class ConversationTurnDTO(BaseModel):
     query: str
     herb_name: str | None = None
@@ -32,7 +32,6 @@ class ConversationTurnDTO(BaseModel):
 class ResolveContextRequest(BaseModel):
     query: str
     history: list[ConversationTurnDTO] = []
-#_____________________________________    
 
 @router.post("/embed")
 async def embed(request: EmbedRequest):
@@ -98,16 +97,20 @@ async def generate_rag_answer(request: RAGRequest):
         "Յուրաքանչյուր բույս կամ կետ սկսիր ՆՈՐ ՏՈՂԻՑ՝ օգտագործելով Markdown ցուցակ (-):"
     )
 
-    if request.primary_herb:
-        user_prompt = (
-            f"Հարց: {request.query}\n\n"
-            f"Կոնտեքստ:\n{context_text}"
-        )
-    else:
-        user_prompt = (
-            f"Հարց: {request.query}\n\n"
-            f"Կոնտեքստ:\n{context_text}"
-        )
+    # if request.primary_herb:
+    #     user_prompt = (
+    #         f"Հարց: {request.query}\n\n"
+    #         f"Կոնտեքստ:\n{context_text}"
+    #     )
+    # else:
+    #     user_prompt = (
+    #         f"Հարց: {request.query}\n\n"
+    #         f"Կոնտեքստ:\n{context_text}"
+    #     )
+    user_prompt = (
+    f"Հարց: {request.query}\n\n"
+    f"Կոնտեքստ:\n{context_text}"
+    )
 
     try:
         raw_response = await ai_service.get_rag_answer(system_prompt, user_prompt)
@@ -132,7 +135,7 @@ async def generate_rag_answer(request: RAGRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-#_____________________________________________________________________________
+
 @router.post("/resolve-context")
 async def resolve_context(request: ResolveContextRequest):
     if not request.history:
@@ -175,7 +178,7 @@ async def resolve_context(request: ResolveContextRequest):
              exc_info=True,
          )
         return {"resolved_query": request.query, "is_follow_up": False}
-#_____________________________________________________________________________
+
 def initialize_services():
     """
     Server-ի բացումից առաջ բոլոր ծանր գործիքները բեռնում ենք։
