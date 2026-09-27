@@ -1,4 +1,5 @@
 import json
+import logging
 from contextlib import asynccontextmanager
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from app.services.ai_service import AIService
 from app.services.nlp_service import ArmenianNLP
 
 router = APIRouter()
-
+logger = logging.getLogger(__name__)
 
 SYMPTOM_INDEX = {}
 expander    = None
@@ -168,7 +169,11 @@ async def resolve_context(request: ResolveContextRequest):
             "resolved_query": data.get("resolved_query", request.query),
             "is_follow_up": data.get("is_follow_up", False),
         }
-    except Exception:
+    except Exception as e:
+        logger.warning(
+             f"resolve_context failed for query={request.query!r}: {e}",
+             exc_info=True,
+         )
         return {"resolved_query": request.query, "is_follow_up": False}
 #_____________________________________________________________________________
 def initialize_services():
