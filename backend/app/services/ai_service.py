@@ -36,7 +36,6 @@ class AIService:
         answer = response.choices[0].message.content
         return answer.strip()
 
-    #new added
     async def resolve_context(self, system_prompt: str, user_prompt: str) -> str:
         """Օգտագործվում է conversation context-ը լուծելու համար (follow-up query resolution)."""
         response = await self.client.chat.completions.create(
