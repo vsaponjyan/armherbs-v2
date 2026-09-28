@@ -97,13 +97,6 @@ export function getHerbButtonStyle(isSelected: boolean, inResults: boolean): CSS
   };
 }
 
-export function getHerbButtonHoverBg(inResults: boolean): string {
-  return inResults ? "#fff59d" : "#e8f5e9";
-}
-
-export function getHerbButtonDefaultBg(inResults: boolean): string {
-  return inResults ? "#fff9c4" : "#fff";
-}
 
 export const selectedHerbCardStyle: CSSProperties = {
   marginBottom: 30,
@@ -114,12 +107,6 @@ export const selectedHerbCardStyle: CSSProperties = {
   position: "relative",
 };
 
-export const closeButtonStyle: CSSProperties = {
-  position: "absolute", top: "10px", right: "10px",
-  backgroundColor: "#f44336", color: "white",
-  border: "none", borderRadius: "4px",
-  padding: "5px 10px", cursor: "pointer",
-};
 
 export const herbImageStyle: CSSProperties = {
   position: "absolute", top: "10px", right: "76px",
@@ -244,7 +231,7 @@ export const ragAnswerStyle: CSSProperties = {
   whiteSpace: "pre-line" 
 };
 
-export const ragSourcesStyle: CSSProperties = { color: "#666" };
+
 
 export const resultsListStyle: CSSProperties = { 
   marginTop: 20, 
@@ -260,9 +247,7 @@ export const resultItemStyle: CSSProperties = {
   backgroundColor: "#f9f9f9" 
 };
 
-export const resultTitleStyle: CSSProperties = { margin: "0 0 10px 0" };
 
-export const resultScoreStyle: CSSProperties = { display: "none" }; 
 
 export const resultHealingStyle: CSSProperties = { margin: "10px 0" };
 
@@ -324,9 +309,6 @@ export const suggestionButtonStyle: CSSProperties = {
 };
 
 export const loadingStyle: CSSProperties = { textAlign: "center", marginTop: 50 };
-
-export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
-
 
 export const footerContainerStyle: CSSProperties = {
   

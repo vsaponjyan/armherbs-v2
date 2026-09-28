@@ -8,7 +8,7 @@ import { herbEntityResolver } from "./herbEntityResolver";
 import { embedText } from "./queryEmbedding";
 import { resultReranker } from "./resultReranker";
 import { HerbData } from "./HerbSearch";
-
+import { logger } from "./utils/logger";
 
 interface UseHerbSearchProps {
   query: string;
@@ -78,7 +78,7 @@ export function useHerbSearch({
           herbsData.map((h) => h.name)
         );
 
-        console.log("rewritten.canonical:", rewritten.canonical);
+        logger.debug("rewritten.canonical:", rewritten.canonical);
 
         const entityResult = herbEntityResolver.resolve(rewritten.canonical);
         let finalQuery = rewritten.canonical;
@@ -186,16 +186,11 @@ export function useHerbSearch({
 
   return {
     results,
-    setResults,
     ragResponse,
-    setRagResponse,
     suggestions,
-    setSuggestions,
     loading,
     error,
-    setError,
     rewriteInfo,
-    setRewriteInfo,
-    handleSearch,
+    handleSearch
   };
 }

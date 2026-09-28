@@ -1,4 +1,5 @@
 import { SYNONYMS } from "./searchConfig";
+import { logger } from "./utils/logger";
 
 interface Herb {
   name: string;
@@ -52,7 +53,7 @@ export class AutoComplete {
       a.localeCompare(b, "hy")
     );
 
-    console.log(`✅ AutoComplete: ${this.flatSymptoms.length} unique symptoms indexed`);
+    logger.debug(`✅ AutoComplete: ${this.flatSymptoms.length} unique symptoms indexed`);
   }
 
   getSuggestions(input: string, maxResults = 5): string[] {

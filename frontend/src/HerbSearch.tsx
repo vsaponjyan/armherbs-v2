@@ -21,6 +21,16 @@ export interface HerbData {
   img: string;
 }
 
+interface FooterTerm {
+  name: string;
+  text: string;
+   }
+  
+interface FooterData {
+  terms: FooterTerm[];
+  literature: string[];
+   }
+
 function buildHerbMap(herbsData: HerbData[]): Map<string, HerbData> {
   return new Map(herbsData.map((h) => [h.id, h]));
 }
@@ -35,7 +45,7 @@ export default function HerbSearch() {
   const [selectedHerb, setSelectedHerb] = useState<HerbData | null>(null);
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const [autocompleteIndex, setAutocompleteIndex] = useState(-1);
-  const [footerData, setFooterData] = useState<any>(null);
+  const [footerData, setFooterData] = useState<FooterData | null>(null);
 
   const ragEngine = useRef(new RAGEngine()).current;
   const herbMap = useMemo(() => buildHerbMap(herbsData), [herbsData]);
@@ -282,12 +292,12 @@ export default function HerbSearch() {
           {view === "terms" && (
             <div style={S.pageContainerStyle}>
               <h2 style={S.footerTitleStyle}>🌿 Բժշկական Տերմիններ</h2>
-              {footerData?.terms?.map((t: any, i: number) => (
-                <div key={i} style={S.termItemStyle}>
-                  <strong style={S.termNameStyle}>{t.name}</strong>
-                  <p style={S.termTextStyle}>{t.text}</p>
-                </div>
-              ))}
+              {footerData?.terms?.map((t, i) => (
+              <div key={i} style={S.termItemStyle}>
+                <strong style={S.termNameStyle}>{t.name}</strong>
+                <p style={S.termTextStyle}>{t.text}</p>
+              </div>
+             ))}
             </div>
           )}
 
