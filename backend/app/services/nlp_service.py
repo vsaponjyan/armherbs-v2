@@ -1,7 +1,4 @@
 import stanza
-#from app.config import ARMENIAN_STOPWORDS
-
-stanza.download('hy', verbose=False)
 
 class ArmenianNLP:
     def __init__(self):
@@ -9,6 +6,7 @@ class ArmenianNLP:
             'hy',
             processors='tokenize,pos,lemma',
             pos_batch_size=1000,
+            download_method=None,
             verbose=False
         )
 
@@ -17,13 +15,12 @@ class ArmenianNLP:
         doc = self.nlp(text)
         clean_parts = []
 
-        # Ավելացված են դերանունները (PRON) և որոշիչները (DET)
+        
         useless_types = {'ADP', 'CCONJ', 'SCONJ', 'AUX', 'PART', 'PRON', 'DET'}
 
         for sentence in doc.sentences:
             for word in sentence.words:
                 lemma = word.lemma.lower()
-                #if word.upos not in useless_types and lemma not in ARMENIAN_STOPWORDS:
                 if word.upos not in useless_types and len(lemma) > 1:    
                     clean_parts.append(word.text.lower())
                     if lemma != word.text.lower():

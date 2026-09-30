@@ -1,4 +1,5 @@
 import { stripArmenianSuffix } from "./utils/armenianStemmer";
+import { logger } from "./utils/logger";
 
 interface HerbInfo {
   id: string;
@@ -51,7 +52,7 @@ private stem(word: string): string {
         }
       }
     }
-    console.log(`✅ Symptom index built: ${this.symptomIndex.size} unique symptoms`);
+    logger.debug(`✅ Symptom index built: ${this.symptomIndex.size} unique symptoms`);
   }
 
   
@@ -116,7 +117,7 @@ private stem(word: string): string {
     if (matches.length > 0) {
       matches.sort((a, b) => b.matchLength - a.matchLength || b.index - a.index);
       const winner = matches[0].herb;
-      console.log(`🎯 Entity Resolved: "${winner.name}" (Longest match wins)`);
+      logger.debug(`🎯 Entity Resolved: "${winner.name}" (Longest match wins)`);
       return this.buildHerbResult(winner, query, keepContext);
     }
 

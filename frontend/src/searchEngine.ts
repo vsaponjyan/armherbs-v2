@@ -1,6 +1,7 @@
 import { FIELD_WEIGHTS } from "./searchConfig";
 import { detectIntent, QueryIntent } from "./intentDetector";
 import { distance } from "fastest-levenshtein";
+import { logger } from "./utils/logger";
 import {
   Herb,
   normalize,
@@ -43,7 +44,7 @@ export class HerbSearchEngine {
     if (!res.ok) throw new Error(`Failed to load: ${res.status}`);
     this.herbs = await res.json();
     this.loaded = true;
-    console.log(`✅ Բեռնված է ${this.herbs!.length} դեղաբույս`);
+    logger.debug(`✅ Բեռնված է ${this.herbs!.length} դեղաբույս`);
   }
 
   private getCacheKey(queryText: string, topK: number): string {

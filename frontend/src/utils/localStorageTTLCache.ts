@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 /**
  * Ընդհանուր helper-ներ localStorage-ում TTL (time-to-live) սկզբունքով
  * պահվող տվյալների համար։ Օգտագործվում է conversationMemory և
@@ -23,7 +24,7 @@ export function autoCleanupIfNeeded<T>(
         const fresh = parsed.filter((item) => now - getTimestamp(item) <= maxAgeMs);
         if (fresh.length < parsed.length) {
           localStorage.setItem(storageKey, JSON.stringify(fresh));
-          console.log(`🧹 ${logLabel}: auto-cleanup — հեռացվել է ${parsed.length - fresh.length} հին entry`);
+          logger.debug(`🧹 ${logLabel}: auto-cleanup — հեռացվել է ${parsed.length - fresh.length} հին entry`);
         }
       }
       localStorage.setItem(autoCleanupKey, String(now));
