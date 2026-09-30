@@ -37,3 +37,4 @@ if __name__ == "__main__":
 
 
 # source venv/bin/activate && python -m uvicorn main:app --reload
+# lsof -ti :8000 | xargs kill -9
