@@ -46,6 +46,7 @@ export default function HerbSearch() {
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   const [autocompleteIndex, setAutocompleteIndex] = useState(-1);
   const [footerData, setFooterData] = useState<FooterData | null>(null);
+  const [footerError, setFooterError] = useState<string | null>(null);
 
   const ragEngine = useRef(new RAGEngine()).current;
   const herbMap = useMemo(() => buildHerbMap(herbsData), [herbsData]);
@@ -106,7 +107,7 @@ export default function HerbSearch() {
         return res.json();
       })
       .then(json => setFooterData(json))
-      .catch(err => console.error("Footer data error:", err));
+      .catch(() => setFooterError("\u054F\u057E\u0575\u0561\u056C\u0576\u0565\u0580\u056B \u0562\u0565\u057C\u0576\u0578\u0582\u0574\u0568 \u0571\u0561\u056D\u0578\u0572\u057E\u0565\u0581\u0589"));
   }, [view, footerData]);
 
   const handleNavigate = (newView: string) => {
@@ -177,7 +178,7 @@ export default function HerbSearch() {
   return (
     <div style={S.containerStyle}>
       {!selectedHerb && (view === "list" || view === "search") && (
-        <div style={S.viewToggleContainer}>
+        <nav style={S.viewToggleContainer} aria-label="Նավիգացիա">
           <button
             style={S.getViewButtonStyle(view === "list")}
             onClick={() => handleNavigate("list")}
@@ -190,12 +191,12 @@ export default function HerbSearch() {
           >
             🌿 Դեղաբույսերի որոնում հիվանդությամբ
           </button>
-        </div>
+        </nav>
       )}
 
       {selectedHerb ? (
         <div style={S.selectedHerbCardStyle}>
-          <button onClick={() => handleNavigate(view)} style={S.backButtonStyle}>
+          <button onClick={() => handleNavigate(view)} style={S.backButtonStyle} aria-label="Ետ գնալ">
             ← Ետ գնալ
           </button>
           {selectedHerb.img && (
@@ -203,8 +204,8 @@ export default function HerbSearch() {
               src={selectedHerb.img}
               alt={selectedHerb.name}
               style={S.herbImageStyle}
-              loading="lazy"
-              decoding="async"
+              loading="eager"
+              decoding="sync"
             />
           )}
           <h2 style={S.herbNameStyle}>🌿 {selectedHerb.name}</h2>
@@ -249,18 +250,19 @@ export default function HerbSearch() {
                 onChange={(e) => setLocalQuery(e.target.value)}
               />
               <div style={S.herbListGridStyle}>
-                {filteredHerbs.map((herb) => (
+                {filteredHerbs.map((herb, idx) => (
                   <button
                     key={herb.id}
                     onClick={() => selectHerb(herb)}
                     style={S.getHerbButtonStyle(false, false)}
+                    aria-label={herb.name}
                   >
                     <img
-                      src={herb.img || "/placeholder-herb.png"}
+                      src={herb.img}
                       alt={herb.name}
                       style={S.herbCardImageStyle}
-                      loading="lazy"
-                      decoding="async"
+                      loading={idx < 4 ? "eager" : "lazy"}
+                      decoding={idx < 4 ? "sync" : "async"}
                     />
                     <span>{herb.name}</span>
                   </button>
@@ -292,6 +294,7 @@ export default function HerbSearch() {
           {view === "terms" && (
             <div style={S.pageContainerStyle}>
               <h2 style={S.footerTitleStyle}>🌿 Բժշկական Տերմիններ</h2>
+              {footerError && <div style={S.errorBoxStyle}>❌ {footerError}</div>}
               {footerData?.terms?.map((t, i) => (
               <div key={i} style={S.termItemStyle}>
                 <strong style={S.termNameStyle}>{t.name}</strong>
@@ -304,6 +307,7 @@ export default function HerbSearch() {
           {view === "literature" && (
             <div style={S.pageContainerStyle}>
               <h2 style={S.footerTitleStyle}>📚 Օգտագործված Գրականություն</h2>
+              {footerError && <div style={S.errorBoxStyle}>❌ {footerError}</div>}
               {footerData?.literature?.map((l: string, i: number) => (
                 <p key={i} style={S.literatureItemStyle}>📖 {l}</p>
               ))}

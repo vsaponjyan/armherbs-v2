@@ -162,9 +162,10 @@ export default function SmartSearchView({
           onKeyDown={handleKeyDown}
           disabled={searchLoading}
           style={S.getSearchInputStyle(searchLoading)}
+          aria-label="Որոնել դեղաբույսեր"
         />
         {autocompleteSuggestions.length > 0 && (
-          <div style={S.autocompleteDropdownStyle}>
+          <div style={S.autocompleteDropdownStyle} role="listbox">
             {autocompleteSuggestions.map((sugg, idx) => (
               <div
                 key={idx}
@@ -188,6 +189,7 @@ export default function SmartSearchView({
         onClick={() => handleSearch()}
         disabled={searchLoading}
         style={S.getSearchButtonStyle(searchLoading)}
+        aria-label="Որոնել"
       >
         {searchLoading ? "Որոնում է..." : "Որոնել"}
       </button>

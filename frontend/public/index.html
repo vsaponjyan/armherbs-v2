@@ -2,15 +2,7 @@
 <html lang="hy">
   <head>
     <meta charset="utf-8" />
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EGF5FB8E4C"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EGF5FB8E4C');
-    </script>
-    <link rel="icon" href="https://armherbs.com/img/favicon.ico"/>
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -18,17 +10,16 @@
       content="Հայկական դեղաբույսերի տեղեկատու և կատալոգ: Գտեք տեղեկություններ ավելի քան 60 բույսերի հատկությունների մասին:"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-     
-    
-    <link rel="preconnect" href="https://armherbs.com"> 
-    <link rel="dns-prefetch" href="https://armherbs.com">
-
+    <meta property="og:title" content="Հայկական Դեղաբույսեր" />
+    <meta property="og:description" content="Հայկական դեղաբույսերի տեղեկատու և կատալոգ: Գտեք տեղեկություններ ավելի քան 60 բույսերի հատկությունների մասին:" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://armherbs.com" />
+    <meta property="og:image" content="https://armherbs.com/logo192.png" />
+    <link rel="canonical" href="https://armherbs.com" />
     <title>Հայկական Դեղաբույսեր</title>
     
     <style>
-      
       [style*="display: grid"] > button {
         content-visibility: auto;
         contain-intrinsic-size: 180px 250px;
@@ -37,7 +28,6 @@
       }
     
       img {
-        font-display: swap;
         height: auto;
       }
     </style>
@@ -46,7 +36,22 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    
+
+    <!-- Google tag (gtag.js) - loaded after page content -->
+    <script>
+      window.addEventListener('load', function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EGF5FB8E4C';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EGF5FB8E4C');
+        };
+      });
+    </script>
   </body>
 </html>
 
