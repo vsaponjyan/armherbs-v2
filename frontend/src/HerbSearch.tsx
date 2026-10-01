@@ -112,6 +112,7 @@ export default function HerbSearch() {
 
   const handleNavigate = (newView: string) => {
     setSelectedHerb(null);
+    document.title = "Հայկական Դեղաբույսեր";
     setView(newView as any);
 
     let path = "/";
@@ -134,7 +135,10 @@ export default function HerbSearch() {
       setView(path as any);
     } else if (path && path !== "") {
       const herb = herbsData.find(h => h.id === path);
-      if (herb) setSelectedHerb(herb);
+      if (herb) {
+        setSelectedHerb(herb);
+        document.title = `${herb.name} — Հայկական Դեղաբույսեր`;
+      }
     }
 
     const handlePopState = () => {
@@ -147,7 +151,12 @@ export default function HerbSearch() {
         setSelectedHerb(null);
       } else {
         const h = herbsData.find(x => x.id === newPath);
-        if (h) setSelectedHerb(h);
+        if (h) {
+          setSelectedHerb(h);
+          document.title = `${h.name} — Հայկական Դեղաբույսեր`;
+        } else {
+          document.title = "Հայկական Դեղաբույսեր";
+        }
       }
     };
 
@@ -168,6 +177,7 @@ export default function HerbSearch() {
 
   const selectHerb = (herb: HerbData) => {
     setSelectedHerb(herb);
+    document.title = `${herb.name} — Հայկական Դեղաբույսեր`;
     window.history.pushState(null, "", `/${herb.id}`);
     window.scrollTo(0, 0);
   };
