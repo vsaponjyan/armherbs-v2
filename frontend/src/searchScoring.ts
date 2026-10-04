@@ -1,6 +1,7 @@
 import { SYNONYMS } from "./searchConfig";
 import { QueryIntent } from "./intentDetector";
 import { stripArmenianSuffix } from "./utils/armenianStemmer";
+import { logger } from "./utils/logger";
 
 export interface Herb {
   id: string;
@@ -178,7 +179,8 @@ for (const [key, synonyms] of Object.entries(SYNONYMS)) {
     }
   }
 }
-console.log(`✅ searchScoring: ${STEMMED_SYNONYMS.size} stemmed keys pre-computed.`);
+
+logger.debug(`✅ searchScoring: ${STEMMED_SYNONYMS.size} stemmed keys pre-computed.`);
 
 export function expandQuery(query: string): { original: string[]; expanded: string[] } {
   const qNorm = normalize(query);
