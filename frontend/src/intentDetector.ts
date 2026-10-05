@@ -6,17 +6,6 @@ import { stripArmenianSuffix } from "./utils/armenianStemmer";
 const stem = stripArmenianSuffix;
 export type { QueryIntent };
 
-// function stem(word: string): string {
-//   if (word.length <= 3) return word;
-//   let stemmed = word;
-//   for (const suffix of ARMENIAN_SUFFIXES) {
-//     if (stemmed.endsWith(suffix) && stemmed.length - suffix.length >= 3) {
-//       stemmed = stemmed.slice(0, -suffix.length);
-//       break;
-//     }
-//   }
-//   return stemmed;
-// }
 
 const STEMMED_SYNONYM_KEYS: Set<string> = new Set(
   Object.keys(SYNONYMS).map((key) => stem(key))
