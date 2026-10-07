@@ -1,14 +1,15 @@
 import json
-from contextlib import asynccontextmanager
+import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.config import SYMPTOM_INDEX_FILE
 from app.services.search_service import QueryExpander
 from app.services.ai_service import AIService
 from app.services.nlp_service import ArmenianNLP
+from app.prompts import build_rag_system_prompt, RESOLVE_CONTEXT_SYSTEM_PROMPT
 
 router = APIRouter()
-
+logger = logging.getLogger(__name__)
 
 SYMPTOM_INDEX = {}
 expander    = None
@@ -23,7 +24,7 @@ class RAGRequest(BaseModel):
     query: str
     context: list[dict]
     primary_herb: str | None = None
-#_____________________________________
+
 class ConversationTurnDTO(BaseModel):
     query: str
     herb_name: str | None = None
@@ -31,7 +32,6 @@ class ConversationTurnDTO(BaseModel):
 class ResolveContextRequest(BaseModel):
     query: str
     history: list[ConversationTurnDTO] = []
-#_____________________________________    
 
 @router.post("/embed")
 async def embed(request: EmbedRequest):
@@ -64,49 +64,12 @@ async def generate_rag_answer(request: RAGRequest):
         context_text += f"Օգտագործում: {herb.get('usage', '')}\n"
         context_text += f"Ախտանշաններ: {', '.join(herb.get('symptoms', []))}\n"
 
-    system_prompt = (
-        "Դու դեղաբույսերի և բուսաբուժության փորձառու մասնագետ ես։\n"
-        "Քո խնդիրն է անել հետևյալ գործողությունները ՄԵԿ պատասխանով.\n\n"
+    system_prompt = build_rag_system_prompt(request.primary_herb)
 
-        "ՄԱՍ 1 — RERANKING:\n"
-        "Վերլուծիր բոլոր տրամադրված բույսերը և դասավորիր դրանց ID-ները "
-        "ըստ հարցի հետ կապի կարևորության։\n"
-        "Գրիր հետևյալ ձևով (պարտադիր).\n"
-        "RANKED_IDS: [\"id1\", \"id2\", \"id3\"]\n\n"
-
-        "ՄԱՍ 2 — ՊԱՏԱՍԽԱՆ:\n"
-        "Տուր պատասխան՝ հիմնվելով ԲԱՑԱՌԱՊԵՍ տրամադրված կոնտեքստի վրա։\n"
+    user_prompt = (
+    f"Հարց: {request.query}\n\n"
+    f"Կոնտեքստ:\n{context_text}"
     )
-
-    if request.primary_herb:
-        system_prompt += (
-            f"ԽՍՏԱԳՈՒՅՆ ԿԱՆՈՆ: Պատասխանիր բացառապես «{request.primary_herb}» բույսի մասին:\n"
-            f"Արգելվում է որևէ այլ բույս առաջարկել, նշել կամ ավելացնել ավելորդ տեքստեր:\n"
-        )
-    else:
-        system_prompt += "Եթե տվյալներում պատասխանը չկա, գրիր. «Ձեր հարցի պատասխանը միգուցե գտնեք ներքոնշյալ դեղաբույսերի մեջ»։\n"
-
-    system_prompt += (
-        "Պատասխանիր հայերեն, եղիր պրոֆեսիոնալ և հակիրճ։\n"
-        "Պատասխանից հետո ԵՐԲԵՔ մի տուր հետագա հարցեր։\n\n"
-
-        "ՄԱՍ 3 — ՖՈՐՄԱՏԱՎՈՐՄԱՆ ԽԻՍՏ ԿԱՆՈՆ (Links):\n"
-        "Պատասխանի մեջ նշվող ԲՈԼՈՐ դեղաբույսերի անունները ՊԱՐՏԱԴԻՐ սարքիր Markdown հղումներ:\n"
-        "Օգտագործիր հետևյալ ձևաչափը. - [Բույսի Անուն](բույսի-id) — նկարագրություն:\n"
-        "ԵՐԲԵՔ մի գրիր ID-ն սովորական փակագծերում, միշտ օգտագործիր [Անուն](id) կառուցվածքը:\n"
-        "Յուրաքանչյուր բույս կամ կետ սկսիր ՆՈՐ ՏՈՂԻՑ՝ օգտագործելով Markdown ցուցակ (-):"
-    )
-
-    if request.primary_herb:
-        user_prompt = (
-            f"Հարց: {request.query}\n\n"
-            f"Կոնտեքստ:\n{context_text}"
-        )
-    else:
-        user_prompt = (
-            f"Հարց: {request.query}\n\n"
-            f"Կոնտեքստ:\n{context_text}"
-        )
 
     try:
         raw_response = await ai_service.get_rag_answer(system_prompt, user_prompt)
@@ -131,7 +94,7 @@ async def generate_rag_answer(request: RAGRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-#_____________________________________________________________________________
+
 @router.post("/resolve-context")
 async def resolve_context(request: ResolveContextRequest):
     if not request.history:
@@ -144,18 +107,7 @@ async def resolve_context(request: ResolveContextRequest):
             history_text += f" → Քննարկված բույս: {turn.herb_name}"
         history_text += "\n"
 
-    system_prompt = (
-        "Դու օգնում ես բուսաբուժության որոնողական համակարգին։\n"
-        "Քեզ կտրվի խոսակցության ամբողջ պատմությունը (հին→նոր հերթականությամբ) "
-        "և վերջին, նոր հարցումը։\n"
-        "Որոշիր՝ արդյոք նոր հարցումը կախված է նախորդ համատեքստից "
-        "(օր. պարունակում է դերանուն, հղում կամ թերի միտք, "
-        "որը հասկանալի է միայն պատմության հետ համատեղ)։\n"
-        "Եթե այո՝ վերաշարադրիր հարցումն ինքնուրույն, ամբողջական տեսքով, "
-        "օգտագործելով ամենավերջին համապատասխան համատեքստը պատմությունից։\n"
-        "Եթե ոչ (հարցումն արդեն ինքնուրույն է, կամ նոր թեմա է)՝ վերադարձրու անփոփոխ։\n"
-        "Պատասխանիր ՄԻԱՅՆ JSON՝ {\"resolved_query\": \"...\", \"is_follow_up\": true/false}"
-    )
+    system_prompt = RESOLVE_CONTEXT_SYSTEM_PROMPT
     user_prompt = (
         f"Պատմություն:\n{history_text}\n"
         f"Նոր հարցում: {request.query}"
@@ -168,9 +120,13 @@ async def resolve_context(request: ResolveContextRequest):
             "resolved_query": data.get("resolved_query", request.query),
             "is_follow_up": data.get("is_follow_up", False),
         }
-    except Exception:
+    except Exception as e:
+        logger.warning(
+             f"resolve_context failed for query={request.query!r}: {e}",
+             exc_info=True,
+         )
         return {"resolved_query": request.query, "is_follow_up": False}
-#_____________________________________________________________________________
+
 def initialize_services():
     """
     Server-ի բացումից առաջ բոլոր ծանր գործիքները բեռնում ենք։
