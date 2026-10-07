@@ -5,6 +5,7 @@ import {
   loadFreshFromStorage,
   saveWithQuotaHandling,
 } from "./utils/localStorageTTLCache";
+import { logger } from "./utils/logger";
 
 interface ClickData {
   query: string;
@@ -46,7 +47,7 @@ export class ResultReranker {
       for (const [key, data] of freshEntries) {
         this.clickData.set(key, data);
       }
-      console.log(`✅ ResultReranker: ${this.clickData.size} click records loaded`);
+      logger.debug(`✅ ResultReranker: ${this.clickData.size} click records loaded`);
     }, 0);
   }
 

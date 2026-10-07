@@ -23,8 +23,7 @@ interface EnrichedResult extends SearchResult {
   chemistry?: string;
 }
 
-//const RAG_API_URL = `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}/api/rag`;
-//const RAG_API_URL = `${import.meta.env.VITE_API_URL ?? ""}/api/rag`;
+
 const RAG_API_URL = `${process.env.REACT_APP_API_URL ?? ""}/api/rag`;
 export class RAGEngine {
 

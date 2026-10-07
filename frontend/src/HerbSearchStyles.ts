@@ -13,6 +13,7 @@ export const viewToggleContainer: CSSProperties = {
   justifyContent: "center",
   gap: "10px",
   marginBottom: "30px",
+  minHeight: "44px",
 };
 
 export function getViewButtonStyle(isActive: boolean): CSSProperties {
@@ -24,7 +25,6 @@ export function getViewButtonStyle(isActive: boolean): CSSProperties {
     color: isActive ? "white" : "#4caf50",
     cursor: "pointer",
     fontWeight: "bold",
-    transition: "0.3s ease",
   };
 }
 
@@ -58,6 +58,7 @@ export const localSearchInputStyle: CSSProperties = {
   borderRadius: "8px",
   boxSizing: "border-box",
   outline: "none",
+  minHeight: "45px",
 };
 
 
@@ -74,7 +75,8 @@ export const herbCardImageStyle: CSSProperties = {
   objectFit: "cover",
   borderRadius: "6px",
   marginBottom: "8px",
-  backgroundColor: "#eee", 
+  backgroundColor: "#eee",
+  aspectRatio: "3 / 2",
 };
 
 
@@ -84,7 +86,6 @@ export function getHerbButtonStyle(isSelected: boolean, inResults: boolean): CSS
     borderRadius: "10px",
     cursor: "pointer",
     fontSize: "14px",
-    transition: "all 0.2s",
     backgroundColor: isSelected ? "#4caf50" : inResults ? "#fff9c4" : "#fff",
     color: isSelected ? "#fff" : "#333",
     border: "1px solid #ddd",
@@ -97,13 +98,6 @@ export function getHerbButtonStyle(isSelected: boolean, inResults: boolean): CSS
   };
 }
 
-export function getHerbButtonHoverBg(inResults: boolean): string {
-  return inResults ? "#fff59d" : "#e8f5e9";
-}
-
-export function getHerbButtonDefaultBg(inResults: boolean): string {
-  return inResults ? "#fff9c4" : "#fff";
-}
 
 export const selectedHerbCardStyle: CSSProperties = {
   marginBottom: 30,
@@ -114,17 +108,12 @@ export const selectedHerbCardStyle: CSSProperties = {
   position: "relative",
 };
 
-export const closeButtonStyle: CSSProperties = {
-  position: "absolute", top: "10px", right: "10px",
-  backgroundColor: "#f44336", color: "white",
-  border: "none", borderRadius: "4px",
-  padding: "5px 10px", cursor: "pointer",
-};
 
 export const herbImageStyle: CSSProperties = {
   position: "absolute", top: "10px", right: "76px",
   width: "120px", height: "120px",
   objectFit: "cover", borderRadius: "8px", border: "2px solid #ddd",
+  aspectRatio: "1 / 1",
 };
 
 export const herbNameStyle: CSSProperties = {
@@ -149,12 +138,12 @@ export const sectionTextStyle: CSSProperties = {
  color: "#555" 
 };
 
-export const symptomTagStyle: CSSProperties = { 
+export const symptomTagStyle: CSSProperties = {
  backgroundColor: "#e0d69b",
- padding: "4px 10px",
- borderRadius: "4px", 
- fontSize: "15px", 
- color: "#01070e" 
+ padding: "8px 14px",
+ borderRadius: "4px",
+ fontSize: "15px",
+ color: "#01070e"
 };
 
 export const tagsWrapperStyle: CSSProperties = { 
@@ -244,7 +233,7 @@ export const ragAnswerStyle: CSSProperties = {
   whiteSpace: "pre-line" 
 };
 
-export const ragSourcesStyle: CSSProperties = { color: "#666" };
+
 
 export const resultsListStyle: CSSProperties = { 
   marginTop: 20, 
@@ -260,9 +249,7 @@ export const resultItemStyle: CSSProperties = {
   backgroundColor: "#f9f9f9" 
 };
 
-export const resultTitleStyle: CSSProperties = { margin: "0 0 10px 0" };
 
-export const resultScoreStyle: CSSProperties = { display: "none" }; 
 
 export const resultHealingStyle: CSSProperties = { margin: "10px 0" };
 
@@ -324,9 +311,6 @@ export const suggestionButtonStyle: CSSProperties = {
 };
 
 export const loadingStyle: CSSProperties = { textAlign: "center", marginTop: 50 };
-
-export const emptyResultsStyle: CSSProperties = { color: "#666", marginTop: 20 };
-
 
 export const footerContainerStyle: CSSProperties = {
   
