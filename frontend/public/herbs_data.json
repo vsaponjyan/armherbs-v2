@@ -30,7 +30,7 @@
       "հարբվածություն"
     ],
     
-    "img": "/herbs/rubus-idaeus.jpg"
+    "img": "/herbs/rubus-idaeus.webp"
   },
   {
     "id": "crataegus",
@@ -65,7 +65,7 @@
       "աթերոսկլերոզ"
     ],
     
-    "img": "/herbs/crataegus.jpg"
+    "img": "/herbs/crataegus.webp"
   },
   {
     "id": "mentha",
@@ -102,7 +102,7 @@
       "քնի խանգարում"
     ],
     
-    "img": "/herbs/mentha.jpg"
+    "img": "/herbs/mentha.webp"
   },
   {
     "id": "helichrysium",
@@ -137,7 +137,7 @@
       "որդեր"
     ],
     
-    "img": "/herbs/helichrysium.jpg"
+    "img": "/herbs/helichrysium.webp"
   },
   {
     "id": "leonurus",
@@ -172,7 +172,7 @@
       "իմպոտենցիա"
     ],
     
-    "img": "/herbs/leonurus.jpg"
+    "img": "/herbs/leonurus.webp"
   },
   {
     "id": "sanguisorba",
@@ -208,7 +208,7 @@
       "կլիմաքսային խանգարումներ"
     ],
     
-    "img": "/herbs/sanguisorba.jpg"
+    "img": "/herbs/sanguisorba.webp"
   },
   {
     "id": "astragalus",
@@ -244,7 +244,7 @@
       "ռևմատիզմ"
     ],
     
-    "img": "/herbs/astragalus.jpg"
+    "img": "/herbs/astragalus.webp"
   },
   {
     "id": "cuscuta",
@@ -286,7 +286,7 @@
       "տենդային վիճակներ"
     ],
     
-    "img": "/herbs/cuscuta.jpg"
+    "img": "/herbs/cuscuta.webp"
   },
   {
     "id": "daphne",
@@ -325,7 +325,7 @@
       "տեսողության խանգարում"
     ],
     
-    "img": "/herbs/daphne.jpg"
+    "img": "/herbs/daphne.webp"
   },
   {
     "id": "humulus",
@@ -359,7 +359,7 @@
       "վեգետանևրոզներ"
     ],
     
-    "img": "/herbs/humulus.jpg"
+    "img": "/herbs/humulus.webp"
   },
   {
     "id": "fragaria",
@@ -386,7 +386,7 @@
       "թարմ պտղի անբավարարություն"
     ],
     
-    "img": "/herbs/fragaria.jpg"
+    "img": "/herbs/fragaria.webp"
   },
   {
     "id": "juniperus",
@@ -413,7 +413,7 @@
       "ստամոքսի սուր և խրոնիկական բորբոքումներ"
     ],
     
-    "img": "/herbs/juniperus.jpg"
+    "img": "/herbs/juniperus.webp"
   },
   {
     "id": "prumula",
@@ -439,7 +439,7 @@
       "խրոնիկական փորկապություն"
     ],
     
-    "img": "/herbs/prumula.jpg"
+    "img": "/herbs/prumula.webp"
   },
   {
     "id": "plantago",
@@ -475,7 +475,7 @@
       "դաշտանի բացում"
     ],
     
-    "img": "/herbs/plantago.jpg"
+    "img": "/herbs/plantago.webp"
   },
   {
     "id": "ononis",
@@ -509,7 +509,7 @@
       "արյունահոսություն"
     ],
     
-    "img": "/herbs/ononis.jpg"
+    "img": "/herbs/ononis.webp"
   },
   {
     "id": "cichorium",
@@ -550,7 +550,7 @@
       "բքնածություն"
     ],
     
-    "img": "/herbs/cichorium.jpg"
+    "img": "/herbs/cichorium.webp"
   },
   {
     "id": "urtica",
@@ -586,7 +586,7 @@
       "թութք"
     ],
     
-    "img": "/herbs/urtica.jpg"
+    "img": "/herbs/urtica.webp"
   },
   {
     "id": "sambucus",
@@ -622,7 +622,7 @@
       "խռպոտություն"
     ],
     
-    "img": "/herbs/sambucus.jpg"
+    "img": "/herbs/sambucus.webp"
   },
   {
     "id": "melilotus",
@@ -671,7 +671,7 @@
       "թրոմբոֆլեբիտ"
     ],
     
-    "img": "/herbs/melilotus.jpg"
+    "img": "/herbs/melilotus.webp"
   },
   {
     "id": "bryonia",
@@ -714,7 +714,7 @@
       "արյան բարձր ճնշում"
     ],
     
-    "img": "/herbs/bryonia.jpg"
+    "img": "/herbs/bryonia.webp"
   },
   {
     "id": "tilia",
@@ -750,7 +750,7 @@
       "շաքարախտի ժամանակ արյան մեջ շաքարի կարգավորում"
     ],
     
-    "img": "/herbs/tilia.jpg"
+    "img": "/herbs/tilia.webp"
   },
   {
     "id": "taraxacum",
@@ -784,7 +784,7 @@
       "հակաֆուրունկուլյոզ"
     ],
     
-    "img": "/herbs/taraxacum.jpg"
+    "img": "/herbs/taraxacum.webp"
   },
   {
     "id": "origanum",
@@ -861,7 +861,7 @@
       "հարբուխ"
     ],
     
-    "img": "/herbs/origanum.jpg"
+    "img": "/herbs/origanum.webp"
   },
   {
     "id": "acorus",
@@ -937,7 +937,7 @@
       "արյան ճնշման իջեցում"
     ],
     
-    "img": "/herbs/acorus.jpg"
+    "img": "/herbs/acorus.webp"
   },
   {
     "id": "verbascum",
@@ -1015,7 +1015,7 @@
       "փորի բքնածություն"
     ],
     
-    "img": "/herbs/verbascum.jpg"
+    "img": "/herbs/verbascum.webp"
   },
   {
     "id": "chelidonium",
@@ -1104,7 +1104,7 @@
       "խոցային հիվանդություն"
     ],
     
-    "img": "/herbs/chelidonium.jpg"
+    "img": "/herbs/chelidonium.webp"
   },
   {
     "id": "asparagus",
@@ -1186,7 +1186,7 @@
       "մարսողության կարգավորում"
     ],
     
-    "img": "/herbs/asparagus.jpg"
+    "img": "/herbs/asparagus.webp"
   },
   {
     "id": "armoracia",
@@ -1254,7 +1254,7 @@
       "ստամոքսի շարժիչ ֆունկցիայի աշխուժացում"
     ],
     
-    "img": "/herbs/armoracia.jpg"
+    "img": "/herbs/armoracia.webp"
   },
   {
     "id": "berberis",
@@ -1292,7 +1292,7 @@
       "բերանի խոռոչի բորբոքումներ"
     ],
     
-    "img": "/herbs/berberis.jpg"
+    "img": "/herbs/berberis.webp"
   },
   {
     "id": "quercus",
@@ -1332,7 +1332,7 @@
       "թունավորումներ սնկերով կամ մետաղներով"
     ],
     
-    "img": "/herbs/quercus.jpg"
+    "img": "/herbs/quercus.webp"
   },
   {
     "id": "onopordon",
@@ -1375,7 +1375,7 @@
       "պիսակ"
     ],
     
-    "img": "/herbs/onopordon.jpg"
+    "img": "/herbs/onopordon.webp"
   },
   {
     "id": "bidens",
@@ -1414,7 +1414,7 @@
       "C ավիտամինոզ"
     ],
     
-    "img": "/herbs/bidens.jpg"
+    "img": "/herbs/bidens.webp"
   },
   {
     "id": "valeriana",
@@ -1453,7 +1453,7 @@
       "աղեփկանք"
     ],
     
-    "img": "/herbs/valeriana.jpg"
+    "img": "/herbs/valeriana.webp"
   },
   {
     "id": "inula",
@@ -1494,7 +1494,7 @@
       "սակավամիզություն"
     ],
     
-    "img": "/herbs/inula.jpg"
+    "img": "/herbs/inula.webp"
   },
   {
     "id": "arctium",
@@ -1533,7 +1533,7 @@
       "երիկամների ախտահարումներ"
     ],
     
-    "img": "/herbs/arctium.jpg"
+    "img": "/herbs/arctium.webp"
   },
   {
     "id": "achillea",
@@ -1573,7 +1573,7 @@
       "աղեփկանք"
     ],
     
-    "img": "/herbs/achillea.jpg"
+    "img": "/herbs/achillea.webp"
   },
   {
     "id": "senecio",
@@ -1603,7 +1603,7 @@
       "սպաստիկ ցավեր"
     ],
     
-    "img": "/herbs/senecio.jpg"
+    "img": "/herbs/senecio.webp"
   },
   {
     "id": "equisetum",
@@ -1640,7 +1640,7 @@
       "անգինա և լնդերի բորբոքում"
     ],
     
-    "img": "/herbs/equisetum.jpg"
+    "img": "/herbs/equisetum.webp"
   },
   {
     "id": "allium",
@@ -1677,7 +1677,7 @@
       "պառկելախոցեր"
     ],
     
-    "img": "/herbs/allium.jpg"
+    "img": "/herbs/allium.webp"
   },
   {
     "id": "galium",
@@ -1712,7 +1712,7 @@
       "սեռական թուլություն"
     ],
     
-    "img": "/herbs/galium.jpg"
+    "img": "/herbs/galium.webp"
   },
   {
     "id": "prunus",
@@ -1748,7 +1748,7 @@
       "ցրտառական հիվանդություններ"
     ],
     
-    "img": "/herbs/prunus.jpg"
+    "img": "/herbs/prunus.webp"
   },
   {
     "id": "polygonum",
@@ -1782,7 +1782,7 @@
       "անքնություն"
     ],
     
-    "img": "/herbs/polygonum.jpg"
+    "img": "/herbs/polygonum.webp"
   },
   {
     "id": "rosa",
@@ -1817,7 +1817,7 @@
       "ծերունական տկարություն"
     ],
     
-    "img": "/herbs/rosa.jpg"
+    "img": "/herbs/rosa.webp"
   },
   {
     "id": "digitalis",
@@ -1844,7 +1844,7 @@
       "զարկերակային ճնշման շեղումներ"
     ],
     
-    "img": "/herbs/digitalis.jpg"
+    "img": "/herbs/digitalis.webp"
   },
   {
     "id": "marrubium",
@@ -1876,7 +1876,7 @@
       "թութք"
     ],
     
-    "img": "/herbs/marrubium.jpg"
+    "img": "/herbs/marrubium.webp"
   },
   {
     "id": "viscum",
@@ -1906,7 +1906,7 @@
       "դժվար լավացող վերքեր և թարախապալարներ"
     ],
     
-    "img": "/herbs/viscum.jpg"
+    "img": "/herbs/viscum.webp"
   },
   {
     "id": "rubus-caesius",
@@ -1936,7 +1936,7 @@
       "հոդացավեր"
     ],
     
-    "img": "/herbs/rubus-caesius.jpg"
+    "img": "/herbs/rubus-caesius.webp"
   },
   {
     "id": "arum",
@@ -1968,7 +1968,7 @@
       "ճիճվակրություն"
     ],
     
-    "img": "/herbs/arum.jpg"
+    "img": "/herbs/arum.webp"
   },
   {
     "id": "echinops",
@@ -2000,7 +2000,7 @@
       "մաշկային հիվանդություններ"
     ],
     
-    "img": "/herbs/echinops.jpg"
+    "img": "/herbs/echinops.webp"
   },
   {
     "id": "thymus",
@@ -2031,7 +2031,7 @@
       "աչքերի բորբոքումներ"
     ],
     
-    "img": "/herbs/thymus.jpg"
+    "img": "/herbs/thymus.webp"
   },
   {
     "id": "hippophae",
@@ -2058,7 +2058,7 @@
       "լուծ (տերևների և ճյուղերի եփուկը)"
     ],
     
-    "img": "/herbs/hippophae.jpg"
+    "img": "/herbs/hippophae.webp"
   },
   {
     "id": "agropyron",
@@ -2085,7 +2085,7 @@
       "ջրգողություն"
     ],
     
-    "img": "/herbs/agropyron.jpg"
+    "img": "/herbs/agropyron.webp"
   },
   {
     "id": "polygonatum",
@@ -2113,7 +2113,7 @@
       "բարձր ջերմություն"
     ],
     
-    "img": "/herbs/polygonatum.jpg"
+    "img": "/herbs/polygonatum.webp"
   },
   {
     "id": "peganum",
@@ -2144,7 +2144,7 @@
       "անդամալուծություն (ծխահարման միջոցով)"
     ],
     
-    "img": "/herbs/peganum.jpg"
+    "img": "/herbs/peganum.webp"
   },
   {
     "id": "hypericum",
@@ -2172,7 +2172,7 @@
       "քիթ-ականջ-կոկորդի հիվանդություններ (հայմորիտ, տոնզիլիտ, օտիտ)"
     ],
     
-    "img": "/herbs/hypericum.jpg"
+    "img": "/herbs/hypericum.webp"
   },
   {
     "id": "tussilago",
@@ -2203,7 +2203,7 @@
       "աթերոսկլերոզ և հիպերտոնիկ հիվանդություն"
     ],
     
-    "img": "/herbs/tussilago.jpg"
+    "img": "/herbs/tussilago.webp"
   },
   {
     "id": "centaurea",
@@ -2241,7 +2241,7 @@
       "միզակապություն և դաշտանի բացակայություն"
     ],
     
-    "img": "/herbs/centaurea.jpg"
+    "img": "/herbs/centaurea.webp"
   },
   {
     "id": "rubia",
@@ -2267,7 +2267,7 @@
       "նևրալգիա և կոնքացավ"
     ],
     
-    "img": "/herbs/rubia.jpg"
+    "img": "/herbs/rubia.webp"
   },
   {
     "id": "althaea",
@@ -2294,7 +2294,7 @@
       "գեղձախտային վերքեր և մաստիտ"
     ],
     
-    "img": "/herbs/althaea.jpg"
+    "img": "/herbs/althaea.webp"
   },
   {
     "id": "pulsatilla",
@@ -2319,7 +2319,7 @@
       "ատամնացավ"
     ],
     
-    "img": "/herbs/pulsatilla.jpg"
+    "img": "/herbs/pulsatilla.webp"
   },
   {
     "id": "saponaria",
@@ -2346,7 +2346,7 @@
       "միզարձակման և դաշտանային ցիկլի խանգարումներ"
     ],
     
-    "img": "/herbs/saponaria.jpg"
+    "img": "/herbs/saponaria.webp"
   },
   {
     "id": "artemisia",
@@ -2374,6 +2374,6 @@
       "ալկոհոլիզմ (համակցված այլ բույսերի հետ)"
     ],
     
-    "img": "/herbs/artemisia.jpg"
+    "img": "/herbs/artemisia.webp"
   }
 ]
