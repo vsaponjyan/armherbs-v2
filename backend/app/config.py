@@ -15,5 +15,4 @@ ALLOWED_ORIGINS = [
 ]
 
 
-HERBS_DATA_FILE = DATA_DIR / "herbs_raw_data.json"
 SYMPTOM_INDEX_FILE = DATA_DIR / "symptom_index.json"
