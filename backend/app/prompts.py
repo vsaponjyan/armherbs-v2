@@ -11,6 +11,12 @@ RAG_SYSTEM_PROMPT_HEAD = (
 
     "PART 1 — RERANKING:\n"
     "Analyze all provided herbs and rank their IDs from most to least relevant to the query.\n"
+    "Use these criteria in order of priority:\n"
+    "  1. Exact name match — if the user mentioned a specific herb by name, rank it first.\n"
+    "  2. Symptom overlap — herbs whose listed symptoms directly match the user's complaint rank higher.\n"
+    "  3. Healing properties — herbs whose healing text closely addresses the query rank higher.\n"
+    "  4. Usage relevance — herbs with relevant preparation or usage instructions rank higher.\n"
+    "  5. General relevance — herbs with a broader but still related description rank last.\n"
     "Output exactly in this format (required):\n"
     "RANKED_IDS: [\"id1\", \"id2\", \"id3\"]\n\n"
 
