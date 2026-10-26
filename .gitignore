@@ -11,3 +11,5 @@ __pycache__
 
 .claude
 .history
+.vercel
+.env*
